@@ -1,0 +1,37 @@
+/* Noor — the background photos (img/bg, thumbnails in img/thumb), each with a colour palette for the
+   panels. Who made each photo and under which licence: CREDITS.md.
+     glass: 1   img/bg/<id>-glass.jpg exists, a blurred copy that fills the scenery clock's digits
+     fg: 1      img/bg/<id>-fg.webp exists, the scenery with the sky cut away, drawn over the clock
+     clock      where the scenery clock sits on this photo: top and size in pixels (of 1080),
+                x: "left", dark: 1 for a dark glass on a pale photo
+     water      the waterline as a share of the height: below it the clock is a reflection
+   Your own photos go in js/mine.js (README, "Your own photos"). */
+window.NOOR_BACKGROUNDS = [
+  {"id": "scene-night", "mood": "night", "name": ["قمم الليل", "Night peaks"], "by": "couch-tv", "accent": "#8dabce", "hi": "#c2d3e5", "argb": "141,171,206", "panel": "12,19,26", "glass": 1, "fg": 1, "clock": {"top": 150, "size": 400}},
+  {"id": "scene-golden", "mood": "dusk", "name": ["الساعة الذهبية", "Golden hour"], "by": "couch-tv", "accent": "#e5b776", "hi": "#eed8ba", "argb": "229,183,118", "panel": "26,20,12", "glass": 1, "fg": 1, "clock": {"top": 152, "size": 390}},
+  {"id": "scene-dawn", "mood": "dawn", "name": ["فجر الغابة", "Rainforest dawn"], "by": "couch-tv", "accent": "#c1ce8d", "hi": "#dee5c2", "argb": "193,206,141", "panel": "23,26,12", "glass": 1, "fg": 1, "clock": {"top": 230, "size": 400}},
+  {"id": "scene-fog", "mood": "day", "name": ["تلال الضباب", "Misty hills"], "by": "couch-tv", "accent": "#8dcec5", "hi": "#c2e5e0", "argb": "141,206,197", "panel": "12,26,24", "glass": 1, "fg": 1, "clock": {"top": 172, "size": 470, "x": "left", "dark": 1}},
+  {"id": "scene-water", "mood": "day", "name": ["خط الماء", "Waterline"], "by": "couch-tv", "accent": "#7be0d5", "hi": "#b9efe9", "argb": "123,224,213", "panel": "12,26,25", "glass": 1, "water": 0.55, "clock": {"top": 268, "size": 420}},
+  {"id": "dawn-k_snowlake", "mood": "dawn", "name": ["بحيرة جبلية ثلجية", "Snowy mountain lake"], "by": "Natalie Toombs · Unsplash", "accent": "#8dcecc", "hi": "#c2e5e4", "argb": "141,206,204", "panel": "12,26,26", "glass": 1},
+  {"id": "day-k_sky_mtn", "mood": "day", "name": ["قمة وسماء", "Peak and sky"], "by": "Paul E. Harrer · Unsplash", "accent": "#8dc7ce", "hi": "#c2e1e5", "argb": "141,199,206", "panel": "12,25,26", "glass": 1, "fg": 1, "clock": {"top": 104, "size": 400}},
+  {"id": "day-k_saudi", "mood": "day", "name": ["صخور الصحراء، السعودية", "Desert rocks, Saudi Arabia"], "by": "M K · Unsplash", "accent": "#cea98d", "hi": "#e5d1c2", "argb": "206,169,141", "panel": "26,18,12", "glass": 1},
+  {"id": "night-k_stars", "mood": "night", "name": ["درب التبانة", "The Milky Way"], "by": "Max McKinnon · Unsplash", "accent": "#8d9cce", "hi": "#c2cbe5", "argb": "141,156,206", "panel": "12,15,26", "glass": 1},
+  {"id": "night-y_icy_water", "mood": "night", "name": ["صخور وبحر ضبابي", "Rocks in a misty sea"], "by": "Nils Leonhardt · Unsplash", "accent": "#8db1ce", "hi": "#c2d6e5", "argb": "141,177,206", "panel": "12,20,26", "glass": 1},
+  {"id": "dusk-c_albury_storm", "mood": "dusk", "name": ["سحابة عاصفة عند الغروب، أستراليا", "Storm cloud at sunset, Albury"], "by": "Thennicke · CC BY-SA 4.0", "accent": "#e0977b", "hi": "#efc8b9", "argb": "224,151,123", "panel": "26,16,12", "glass": 1},
+  {"id": "day-c_grose_valley", "mood": "day", "name": ["وادي غروس، الجبال الزرقاء", "Grose Valley, Blue Mountains"], "by": "Diliff · CC BY-SA 3.0", "accent": "#87e07b", "hi": "#bfefb9", "argb": "135,224,123", "panel": "14,26,12", "glass": 1},
+  {"id": "dawn-c_tessellated", "mood": "dawn", "name": ["الرصيف الفسيفسائي عند الشروق، تسمانيا", "Tessellated Pavement at sunrise, Tasmania"], "by": "JJ Harrison · CC BY-SA 2.5", "accent": "#ce948d", "hi": "#e5c6c2", "argb": "206,148,141", "panel": "26,14,12", "glass": 1},
+  {"id": "dusk-c_aresquiers", "mood": "dusk", "name": ["شاطئ أريسكييه عند الغروب، فرنسا", "Aresquiers beach at sunset, France"], "by": "Christian Ferrer · CC BY 4.0", "accent": "#ce9b8d", "hi": "#e5cac2", "argb": "206,155,141", "panel": "26,15,12", "glass": 1},
+  {"id": "dusk-c_vang_vieng", "mood": "dusk", "name": ["غروب فوق حقول الأرز، لاوس", "Sunset over paddy fields, Laos"], "by": "Basile Morin · CC BY-SA 4.0", "accent": "#e0b57b", "hi": "#efd8b9", "argb": "224,181,123", "panel": "26,20,12", "glass": 1},
+  {"id": "dawn-w_sossusvlei_dune45", "mood": "dawn", "name": ["الكثيب 45، سوسوسفلي، ناميبيا", "Dune 45, Sossusvlei, Namibia"], "by": "Giles Laurent · CC BY-SA 4.0", "accent": "#e07b7b", "hi": "#efb9b9", "argb": "224,123,123", "panel": "26,12,12", "glass": 1},
+  {"id": "day-w_desert_caravan", "mood": "day", "name": ["الصحراء الكبرى، المغرب", "Sahara, Morocco"], "by": "Sergey Pesterev · CC BY-SA 4.0", "accent": "#e0af7b", "hi": "#efd4b9", "argb": "224,175,123", "panel": "26,19,12", "glass": 1},
+  {"id": "day-w_hunza_valley", "mood": "day", "name": ["وادي هونزا، باكستان", "Hunza Valley, Pakistan"], "by": "Alllexxxis · CC BY-SA 4.0", "accent": "#8dbfce", "hi": "#c2dde5", "argb": "141,191,206", "panel": "12,23,26", "glass": 1},
+  {"id": "day-w_jebel_akhdar", "mood": "day", "name": ["الجبل الأخضر، عُمان", "Jebel Akhdar, Oman"], "by": "Philipp Weigell · CC BY 3.0", "accent": "#7bcae0", "hi": "#b9e3ef", "argb": "123,202,224", "panel": "12,23,26", "glass": 1},
+  {"id": "dusk-w_pik_pobedy", "mood": "dusk", "name": ["قمة جنكيش تشوكوسو، تيان شان، قيرغيزستان", "Jengish Chokusu, Tian Shan, Kyrgyzstan"], "by": "Maryliflower · CC BY-SA 4.0", "accent": "#ce968d", "hi": "#e5c7c2", "argb": "206,150,141", "panel": "26,14,12", "glass": 1},
+  {"id": "night-w_arkhyz_milky_way", "mood": "night", "name": ["وادي ماروخا، أرخيز، القوقاز", "Marukha Valley, Arkhyz, Caucasus"], "by": "Alexander Kurilov · CC BY 4.0", "accent": "#8db6ce", "hi": "#c2d8e5", "argb": "141,182,206", "panel": "12,21,26", "glass": 1},
+  {"id": "dusk-w_sultan_ahmed", "mood": "dusk", "name": ["جامع السلطان أحمد، إسطنبول، تركيا", "Sultan Ahmed Mosque, Istanbul, Turkey"], "by": "Moonik · CC BY-SA 3.0", "accent": "#8d95ce", "hi": "#c2c7e5", "argb": "141,149,206", "panel": "12,14,26", "glass": 1},
+  {"id": "day-w_al_aqsa", "mood": "day", "name": ["المسجد الأقصى، القدس", "Al-Aqsa Mosque, Jerusalem"], "by": "Godot13 · CC BY-SA 4.0", "accent": "#ce8dcd", "hi": "#e5c2e4", "argb": "206,141,205", "panel": "26,12,26", "glass": 1},
+  {"id": "dusk-w_kota_kinabalu", "mood": "dusk", "name": ["مسجد مدينة كوتا كينابالو، صباح، ماليزيا", "Kota Kinabalu City Mosque, Sabah, Malaysia"], "by": "CEphoto, Uwe Aranas · CC BY-SA 4.0", "accent": "#7bace0", "hi": "#b9d3ef", "argb": "123,172,224", "panel": "12,19,26", "glass": 1},
+  {"id": "night-w_shamakhi_juma", "mood": "night", "name": ["مسجد الجمعة، شماخي، أذربيجان", "Juma Mosque, Shamakhi, Azerbaijan"], "by": "Diego Delso · CC BY-SA 4.0", "accent": "#e07b8e", "hi": "#efb9c3", "argb": "224,123,142", "panel": "26,12,15", "glass": 1},
+  {"id": "dawn-w_langtang", "mood": "dawn", "name": ["منتزه لانغتانغ الوطني، نيبال", "Langtang National Park, Nepal"], "by": "Q-lieb-in · CC BY-SA 4.0", "accent": "#9b7be0", "hi": "#cab9ef", "argb": "155,123,224", "panel": "17,12,26", "glass": 1},
+  {"id": "dawn-w_sultan_qaboos", "mood": "dawn", "name": ["جامع السلطان قابوس الأكبر، مسقط، عُمان", "Sultan Qaboos Grand Mosque, Muscat, Oman"], "by": "Riyadh Al Balushi · CC BY 2.0", "accent": "#cebd8d", "hi": "#e5dcc2", "argb": "206,189,141", "panel": "26,23,12", "glass": 1}
+];

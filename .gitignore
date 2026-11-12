@@ -1,0 +1,18 @@
+# The Samsung install tool (Apps2Samsung), downloads, old builds and scratch files
+tools/
+build/
+
+# Built packages. They are never committed: each person signs the app with their own
+# Samsung certificate when they install it (README, "Install it on your TV").
+dist/
+*.wgt
+
+# Your own photos and their list stay yours (README, "Your own photos")
+img/bg/mine/
+img/thumb/mine/
+js/mine.js
+
+.DS_Store
+.venv/
+__pycache__/
+*.pyc

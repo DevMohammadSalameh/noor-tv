@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>Noor · نور</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <!-- Photo background: two layers cross-fade. app.js fills each with the photo and, for the
+       scenery clock, the glass clock and the cut-out of the photo that stands in front of it -->
+  <div class="bg" id="bgA"></div>
+  <div class="bg" id="bgB"></div>
+  <div class="scrim"></div>
+
+  <div id="ui">
+  <!-- Header -->
+  <header class="top">
+    <div class="brand">
+      <svg class="crescent" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M40 8a26 26 0 1 0 16 44A22 22 0 1 1 40 8z" fill="#d8b56a"/>
+        <path d="M47 20l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.8 2.7 1-5.3-4-3.7 5.4-.6z" fill="#d8b56a"/>
+      </svg>
+      <div>
+        <div class="brand-ar kufi">نـور</div>
+        <div class="brand-en">NOOR · HOME</div>
+      </div>
+    </div>
+    <div class="weather w-weather" id="weather">
+      <div class="w-icon" id="wIcon"></div>
+      <div>
+        <div class="w-temp" id="wTemp">--°</div>
+        <div class="w-desc"><span id="wDescAr"></span> · <span id="cityEn"></span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="pills" id="pills"></div>
+
+  <!-- Clock & dates -->
+  <section class="w w-clock" id="wClock">
+    <div class="greet"><span class="ar ruqaa">السلام عليكم ورحمة الله</span></div>
+    <div class="clock"><span id="clockHM">--:--</span><span class="clock-side"><span id="clockS">--</span><span id="clockAmPm"></span></span></div>
+    <div class="dates">
+      <div class="date-g"><span class="ar" id="dayAr"></span><span class="dot">•</span><span id="dateEn"></span></div>
+      <div class="date-h"><span class="ar" id="hijriAr"></span><span class="dot">•</span><span id="hijriEn"></span></div>
+    </div>
+  </section>
+
+  <!-- Card: occasion (Friday / Ramadan / Eid …) or verse of the day -->
+  <section class="w w-card" id="wCard">
+    <div class="occ-card" id="occCard">
+      <div class="occ-head">
+        <span class="occ-title ar kufi" id="occTitle"></span>
+        <span class="occ-badge ar" id="occBadge"></span>
+        <span class="occ-sub en" id="occSub"></span>
+      </div>
+      <div class="occ-body ar" id="occBody"></div>
+      <div class="occ-foot">
+        <div class="occ-actions" id="occActions"></div>
+        <div class="occ-count" id="occCountWrap"><span class="ar" id="occCountLabel"></span> <b id="occCount"></b></div>
+        <span class="occ-note ar" id="occNote"></span>
+      </div>
+      <div class="occ-progress"><div id="occProg"></div></div>
+    </div>
+    <div class="ayah-card" id="ayahCard">
+      <div class="ayah-label"><span class="ar">آية اليوم</span> <span class="en">· VERSE OF THE DAY</span></div>
+      <div class="ayah ar" id="ayahAr"></div>
+      <div class="ayah-meta"><span class="ar ref" id="ayahRef"></span><span class="en mean" id="ayahEn"></span></div>
+    </div>
+  </section>
+
+  <!-- Prayer times: arch panel -->
+  <aside class="w w-prayers w-arch arch" id="wArch">
+    <div class="arch-inner">
+      <div class="arch-title"><span class="ar kufi">مواقيت الصلاة</span><span class="en">PRAYER TIMES</span></div>
+      <div class="next">
+        <div class="next-label"><span class="ar">الصلاة القادمة</span> · <span class="en">Next</span></div>
+        <div class="next-name"><span class="ar" id="nextAr">--</span> <span class="en" id="nextEn"></span></div>
+        <div class="next-count" id="nextCount">--:--:--</div>
+      </div>
+      <ul class="plist" id="plist"></ul>
+    </div>
+  </aside>
+  <!-- Prayer times: bottom strip -->
+  <div class="w w-prayers w-strip" id="wStrip"></div>
+  <!-- Prayer times: next-prayer chip -->
+  <div class="w w-prayers w-next" id="wNext"><span class="nx-name ar" id="nxName"></span><span class="nx-time" id="nxTime"></span><span class="nx-count" id="nxCount"></span></div>
+
+  <!-- Settings button: shown when any key is pressed -->
+  <div class="tiles"><div class="gear" id="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="t-ar">الإعدادات</span><span class="t-en">Settings</span></div></div>
+
+  <!-- Dhikr ticker -->
+  <footer class="dhikr w-dhikr"><span class="orn">۞</span><span class="ar" id="dhikr"></span><span class="orn">۞</span></footer>
+  </div>
+  <div class="dim"></div>
+
+  <!-- Prayer alert -->
+  <div class="alert" id="alert"><span class="ar" id="alertText"></span></div>
+
+  <!-- All apps overlay -->
+  <div class="overlay" id="appsOverlay">
+    <div class="ov-head"><span class="ov-title"><span class="t-ar ar">كل التطبيقات</span><span class="t-en">All apps</span></span></div>
+    <div class="apps-grid" id="appsGrid"></div>
+    <div class="ov-hint"><span class="t-ar ar"><b>OK</b> فتح &nbsp;&nbsp; <b class="yel">●</b> تثبيت على الرئيسية &nbsp;&nbsp; <b>BACK</b> رجوع</span><span class="t-en"><b>OK</b> Open &nbsp;&nbsp; <b class="yel">●</b> Pin to home &nbsp;&nbsp; <b>BACK</b> Back</span></div>
+  </div>
+
+  <!-- Background gallery overlay -->
+  <div class="overlay" id="galOverlay">
+    <div class="ov-head"><span class="ov-title"><span class="t-ar ar">الخلفيات</span><span class="t-en">Backgrounds</span></span><span class="ov-count" id="galCount"></span></div>
+    <div class="gal-grid" id="galGrid"></div>
+    <div class="ov-hint"><span class="t-ar ar"><b>OK</b> اختيار / إلغاء &nbsp;&nbsp; <b class="yel">●</b> هذه فقط &nbsp;&nbsp; <b class="grn">●</b> الكل &nbsp;&nbsp; <b>BACK</b> حفظ</span><span class="t-en"><b>OK</b> Toggle &nbsp;&nbsp; <b class="yel">●</b> Only this &nbsp;&nbsp; <b class="grn">●</b> All &nbsp;&nbsp; <b>BACK</b> Save</span></div>
+  </div>
+
+  <!-- Settings: sections on one side, their rows on the other; also the first-run setup. Drawn by app.js -->
+  <div class="overlay set2" id="setOverlay">
+    <div class="set-side">
+      <div class="set-title" id="setTitle"></div>
+      <div class="set-secs" id="setSecs"></div>
+      <div class="set-wiz" id="setWiz"></div>
+    </div>
+    <div class="set-main">
+      <div class="set-crumb" id="setCrumb"></div>
+      <div class="set-head" id="setHead"></div>
+      <div class="set-type" id="setType">
+        <label id="setTypeLabel" for="setInput"></label>
+        <input id="setInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+      </div>
+      <div class="set-rows" id="setRows"></div>
+      <div class="set-msg" id="setMsg"></div>
+      <div class="set-hint" id="setHint"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <audio id="player" preload="none"></audio>
+</div>
+
+<script src="js/content.js"></script>
+<script src="js/cities.js"></script>
+<script src="js/backgrounds.js"></script>
+<!-- optional, yours only: your own photos (see README, "Your own photos"). Missing is fine. -->
+<script src="js/mine.js" onerror="void 0"></script>
+<script src="js/praytimes.js"></script>
+<script src="js/occasions.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
