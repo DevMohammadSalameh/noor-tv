@@ -223,5 +223,5 @@ or on the TV: Apps, Settings (the cog), pick Noor, Delete. To switch Developer M
 
 Noor's code is under the [MIT licence](LICENSE). The scenery clock and the shape of the settings
 screen come from [couch-tv](https://github.com/Seagey/couch-tv) (MIT, Copyright (c) 2026 Seagey),
-as do five of the scenes. Every photo, font and data source is named with its licence in
+as do five of the scenes ([NOTICE](NOTICE)). Every photo, font and data source is named with its licence in
 [CREDITS.md](CREDITS.md).

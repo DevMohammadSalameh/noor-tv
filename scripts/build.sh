@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 VERSION=$(sed -n 's/.*<widget[^>]* version="\([^"]*\)".*/\1/p' config.xml)
 [ -n "$VERSION" ] || { echo "could not read the version from config.xml"; exit 1; }
 OUT="$PWD/dist/Noor-$VERSION.wgt"
-FILES="config.xml index.html icon.png css js fonts img LICENSE LICENSES CREDITS.md"
+FILES="config.xml index.html icon.png css js fonts img LICENSE NOTICE LICENSES CREDITS.md"
 mkdir -p dist
 rm -f "$OUT"
 if [ "$1" = "--release" ]; then
