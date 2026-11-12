@@ -21,7 +21,8 @@ server and no account behind it.
 - **A banner at prayer time**, and a reminder some minutes before if you want one.
 - **Hijri date**, with a day's adjustment either way, and **occasions**: Surat al-Kahf on Friday,
   Ramadan with a countdown to iftar, the Eids, the ten days of Dhul-Hijjah, Arafah, the white days.
-  Recitations stream when you press play.
+- **A Quran player**: any of the 114 surahs, from fourteen reciters. When a surah ends the next
+  one starts. Favourites, and it remembers where you stopped.
 - **Four layouts**: Classic (large clock and the prayer arch), Centered, Ambient, and the
   **Scenery clock**, a big glass clock that sits *behind* the mountains of the photo.
 - **Photos that follow the day**: dawn photos at dawn, night photos at night. Add your own.
@@ -85,7 +86,7 @@ apps2samsung-cli tv <tv address>
 It should say the TV is ready, Developer mode on, with your computer's address as the host. Then:
 
 ```sh
-apps2samsung-cli install dist/Noor-1.7.0.wgt --tv <tv address>
+apps2samsung-cli install dist/Noor-1.8.0.wgt --tv <tv address>
 ```
 
 The first time, a browser opens for the Samsung account sign-in. The tool turns that into a
@@ -110,11 +111,34 @@ it offers first comes from the TV's time zone. All of it can be changed later in
 - Any button shows the **Settings** button. **OK** opens it.
 - In Settings: **▲ ▼** move, **OK** opens a section or changes a row, **◀ ▶** change a value,
   **Back** steps back and then saves and closes.
-- On the home, **▲** reaches the play button on an occasion card. **Play/Pause** and **Stop** on
-  the remote work too.
+- Any button also shows the **Quran** button beside Settings; **◀ ▶** move between the two.
+- On the home, **▲** reaches the buttons on the card. **Play/Pause** and **Stop** on the remote
+  work everywhere, as do **⏭ ⏮** (next and previous surah) and **⏩ ⏪** (30 seconds) on remotes
+  that have them.
 - In the photo grid: **OK** switches a photo on or off, **yellow** keeps only that one, **green**
   switches them all on.
 - **Back** on the home returns to Samsung's own home.
+
+## Listening to the Quran
+
+Open the **Quran** button on the home, or **All surahs** on the card.
+
+- **OK** on a surah plays it. OK on the one playing pauses it; OK on the one you stopped at carries
+  on from that minute.
+- **When a surah ends the next one starts**, in the order of the mushaf, and stops after An-Nas.
+  The **blue** button (or Settings, General, After a surah) changes that to Stop, Repeat it, or
+  Shuffle.
+- **Yellow** marks a favourite. **Green** shows only your favourites; played from there, "next"
+  stays among them.
+- **Red** changes the reciter.
+- **Back** leaves the list and the recitation carries on. A small bar on the home shows the surah,
+  the reciter and how far along it is.
+- The home card offers **Continue** where you stopped. On Friday it offers Al-Kahf, after Isha
+  Al-Mulk, in Ramadan Al-Baqarah, and on the Eids the takbeer.
+- Noor remembers the surah and the minute even after the TV is switched off. Nothing ever starts
+  playing by itself.
+
+The recitations are streamed, so this part needs the internet.
 
 ## Prayer times, and how far to trust them
 
@@ -168,8 +192,8 @@ Noor has no analytics and no server of its own. It makes these requests and no o
 
 - **Weather**: your city's coordinates go to [Open-Meteo](https://open-meteo.com) every half hour.
 - **City search**, only when you use it: the name you type goes to Open-Meteo's geocoding service.
-- **Recitations**, only when you press play: the audio streams from mp3quran.net, with
-  cdn.islamic.network as a backup, and the Eid takbeer from makkahlive.net.
+- **Recitations**, only while you listen: the audio streams from mp3quran.net, with
+  cdn.islamic.network as a backup for two reciters, and the Eid takbeer from makkahlive.net.
 
 Prayer times, the Hijri date and everything else work with the TV offline.
 
@@ -204,6 +228,7 @@ Back. Handy additions to the address, none of which save anything:
 | `js/praytimes.js` | The prayer time calculation and the methods |
 | `js/occasions.js` | Friday, Ramadan, the Eids and the other occasions |
 | `js/content.js` | Verses, adhkar, reciters. Edit freely |
+| `js/quran.js` | The 114 surahs: names and ayah counts |
 | `js/cities.js` | The bundled cities (generated from GeoNames) |
 | `js/backgrounds.js` | The photos, their colours and where the scenery clock sits |
 | `scripts/build.sh` | Packs the unsigned `.wgt`; `--release` packs only what git tracks |

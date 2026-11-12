@@ -328,7 +328,7 @@ body.q-dim:not(.awake) .dim { opacity: 0.5; }
 .w-strip .sc .t { font-size: 32px; }
 .w-next .nx-name .en { font-family: 'SamsungOne', 'Helvetica Neue', Arial, sans-serif; }
 /* ---------- v1.6: single settings button replaces the app row ---------- */
-.tiles { left: auto; right: 90px; top: auto; bottom: 64px; height: auto; display: block; }
+.tiles { left: auto; right: 90px; top: auto; bottom: 64px; height: auto; }
 .gear { display: -webkit-flex; display: flex; align-items: center; height: 64px; padding: 0 28px 0 20px; border-radius: 32px;
   background: rgba(var(--panel),0.7); border: 1px solid rgba(var(--argb),0.35); color: #e9e1cf; font-size: 26px;
   -webkit-transition: -webkit-transform 0.15s ease, background 0.15s ease; transition: transform 0.15s ease, background 0.15s ease; }
@@ -542,3 +542,89 @@ body:not(.awake).vis-clock-press .bg.sc .gclock { opacity: 0; }
 .clock-scene.sc-dark .weather, .clock-scene.sc-dark .w-temp { color: #16201d; text-shadow: none; }
 .clock-scene.sc-dark .w-desc { color: #2c4a40; }
 .clock-scene.lang-ar .w-clock #dateEn { display: inline-block; direction: ltr; unicode-bidi: embed; }
+
+/* =====================================================================
+   The Quran player: the home's two buttons, the now-playing bar, the card's buttons, the list
+   ===================================================================== */
+.tiles { display: -webkit-flex; display: flex; }
+.tiles .gear { margin-left: 16px; }
+.gear svg { -webkit-flex: none; flex: none; }
+/* what is playing: above the buttons when they show, in their place when they do not */
+.now-bar { position: absolute; right: 90px; bottom: 64px; max-width: 460px; height: 64px; padding: 0 26px 0 20px; border-radius: 32px; display: none;
+  -webkit-align-items: center; align-items: center; overflow: hidden; background: rgba(var(--panel),0.74); border: 1px solid rgba(var(--argb),0.4); color: var(--hi);
+  -webkit-transition: bottom 0.35s ease, opacity 0.6s ease; transition: bottom 0.35s ease, opacity 0.6s ease; }
+.has-audio .now-bar { display: -webkit-flex; display: flex; }
+.pr-strip .now-bar { bottom: 250px; }
+.tiles-shown .now-bar { bottom: 144px; }
+.tiles-shown.pr-strip .now-bar { bottom: 330px; }
+.now-bar .ic { -webkit-flex: none; flex: none; width: 26px; height: 26px; margin-right: 14px; }
+.now-bar .ic path, .now-bar .ic rect, .q-bar .ic path, .q-bar .ic rect { fill: currentColor; }
+.nb-text { min-width: 0; line-height: 1.15; }
+.nb-text b { display: block; font-size: 24px; font-weight: 600; color: #fbf4e4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lang-ar .nb-text b { font-family: 'NoorNaskh', serif; font-size: 27px; }
+.nb-text small { display: block; font-size: 17px; color: #c9d3d0; letter-spacing: 0.02em; white-space: nowrap; }
+.nb-line { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,0.1); }
+.nb-line i, .qb-line i { display: block; height: 100%; background: var(--hi); }
+.lang-ar .now-bar { -webkit-flex-direction: row-reverse; flex-direction: row-reverse; padding: 0 20px 0 26px; text-align: right; }
+.lang-ar .now-bar .ic { margin: 0 0 0 14px; }
+
+/* the card's buttons: the list button is quieter; the verse card has buttons too */
+.occ-btn .t-ar { font-family: 'NoorNaskh', serif; }
+.occ-btn .t-en { font-size: 23px; letter-spacing: 0.01em; }
+.occ-btn.ghost { background: rgba(var(--argb),0.16); color: var(--hi); border-color: rgba(var(--argb),0.45); }
+.occ-btn.ghost .ic path { stroke: currentColor; }
+.occ-btn.ghost.focus { background: var(--hi); color: rgb(var(--panel)); border-color: #fff4d6; }
+.ayah-actions { margin-top: 10px; }
+.ayah-actions .occ-btn { height: 50px; font-size: 24px; padding: 0 22px 0 18px; }
+.ayah-card { max-height: 320px; }
+.card-minimal .ayah-actions { -webkit-justify-content: flex-end; justify-content: flex-end; }
+.clock-center.card-minimal .ayah-actions, .clock-scene.card-minimal .ayah-actions { -webkit-justify-content: center; justify-content: center; }
+.clock-scene .ayah-card { max-height: 270px; }
+.clock-scene .ayah-actions .occ-btn { height: 46px; font-size: 22px; }
+
+/* the list of surahs */
+.q-grid { margin-top: 22px; height: 632px; overflow: hidden; padding: 10px 0 0 10px; }
+.q-grid .scroller { -webkit-transition: -webkit-transform 0.25s ease; transition: transform 0.25s ease; }
+.qtile { position: relative; float: left; width: 256px; height: 104px; margin: 0 22px 20px 0; padding: 0 14px 0 12px; border-radius: 22px; overflow: hidden;
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.07);
+  -webkit-transition: -webkit-transform 0.12s ease-out, background 0.12s ease-out; transition: transform 0.12s ease-out, background 0.12s ease-out; }
+.lang-ar .qtile { float: right; margin: 0 0 20px 22px; -webkit-flex-direction: row-reverse; flex-direction: row-reverse; padding: 0 12px 0 14px; }
+.lang-ar .q-grid { padding: 10px 10px 0 0; }
+.qtile .qn { -webkit-flex: none; flex: none; width: 46px; height: 46px; border-radius: 23px; margin-right: 12px; text-align: center; line-height: 46px; font-size: 20px;
+  color: var(--accent); background: rgba(var(--argb),0.14); }
+.lang-ar .qtile .qn { margin: 0 0 0 12px; font-size: 22px; }
+.qtile .qt { -webkit-flex: 1; flex: 1; min-width: 0; }
+.qtile .qt b { display: block; font-size: 31px; line-height: 40px; font-weight: 700; color: #fbf4e4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+.lang-ar .qtile .qt b { text-align: right; }
+.qtile .qt small { display: block; font-size: 15px; line-height: 20px; color: #9fb3ad; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lang-ar .qtile .qt small { text-align: right; }
+.lang-ar .qtile .qt small .t-ar { font-family: 'NoorNaskh', serif; font-size: 17px; }
+.qtile .qf { position: absolute; top: 6px; right: 12px; font-size: 18px; color: #f4cf3a; display: none; }
+.lang-ar .qtile .qf { right: auto; left: 12px; }
+.qtile.fav .qf { display: block; }
+.qtile .qp { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--hi); display: none; }
+.qtile.playing .qp, .qtile.paused .qp { display: block; }
+.qtile.paused .qp { opacity: 0.45; }
+.qtile.playing, .qtile.paused { background: rgba(var(--argb),0.2); border-color: rgba(var(--argb),0.55); }
+.qtile.focus { -webkit-transform: scale(1.06); transform: scale(1.06); background: var(--hi); border-color: #fff4d6; }
+.qtile.focus .qt b { color: #1d1608; } .qtile.focus .qt small { color: rgba(29,22,8,0.7); }
+.qtile.focus .qn { background: rgba(0,0,0,0.1); color: #1d1608; }
+.qtile.focus .qf { color: #8a6a00; }
+.q-bar { position: absolute; left: 120px; right: 120px; bottom: 84px; height: 96px; padding: 0 34px; border-radius: 26px; overflow: hidden;
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(var(--argb),0.35); }
+.lang-ar .q-bar { -webkit-flex-direction: row-reverse; flex-direction: row-reverse; }
+.qb-ic { -webkit-flex: none; flex: none; color: var(--hi); margin-right: 22px; }
+.lang-ar .qb-ic { margin: 0 0 0 22px; }
+.qb-ic .ic { width: 38px; height: 38px; display: block; }
+.qb-text { -webkit-flex: 1; flex: 1; min-width: 0; }
+.lang-ar .qb-text { text-align: right; }
+.qb-text b { display: block; font-size: 32px; line-height: 40px; color: #fbf4e4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lang-ar .qb-text b { font-family: 'NoorNaskh', serif; font-size: 35px; }
+.qb-text small { display: block; font-size: 20px; line-height: 28px; color: #9fb3ad; }
+.lang-ar .qb-text small { font-family: 'NoorNaskh', serif; font-size: 23px; }
+.qb-time { -webkit-flex: none; flex: none; font-size: 30px; font-weight: 300; color: var(--hi); letter-spacing: 0.04em; direction: ltr; }
+.qb-line { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(255,255,255,0.08); }
+.ov-hint .red { color: #ff6b5e; } .ov-hint .blu { color: #5aa8ff; }
+/* with the prayer strip along the bottom the card sits in the middle, so the bar goes up under the weather */
+.pr-strip .now-bar, .tiles-shown.pr-strip .now-bar { top: 150px; bottom: auto; max-width: 420px; }

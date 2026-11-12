@@ -68,6 +68,7 @@
       <div class="ayah-label"><span class="ar">آية اليوم</span> <span class="en">· VERSE OF THE DAY</span></div>
       <div class="ayah ar" id="ayahAr"></div>
       <div class="ayah-meta"><span class="ar ref" id="ayahRef"></span><span class="en mean" id="ayahEn"></span></div>
+      <div class="occ-actions ayah-actions" id="ayahActions"></div>
     </div>
   </section>
 
@@ -88,8 +89,11 @@
   <!-- Prayer times: next-prayer chip -->
   <div class="w w-prayers w-next" id="wNext"><span class="nx-name ar" id="nxName"></span><span class="nx-time" id="nxTime"></span><span class="nx-count" id="nxCount"></span></div>
 
-  <!-- Settings button: shown when any key is pressed -->
-  <div class="tiles"><div class="gear" id="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="t-ar">الإعدادات</span><span class="t-en">Settings</span></div></div>
+  <!-- What is playing: shown while a surah plays or is paused. Filled by app.js -->
+  <div class="now-bar" id="nowBar"></div>
+
+  <!-- The Quran and Settings buttons: shown when any key is pressed -->
+  <div class="tiles"><div class="gear" id="quranBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.6 4 5v13c3.200-.400 6 0 8 1.500 2-1.500 4.800-1.900 8-1.500V5c-3.200-.400-6 0-8 1.500z"/><path d="M12 6.500V19.500"/></svg><span class="t-ar">القرآن</span><span class="t-en">Quran</span></div><div class="gear" id="gear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="t-ar">الإعدادات</span><span class="t-en">Settings</span></div></div>
 
   <!-- Dhikr ticker -->
   <footer class="dhikr w-dhikr"><span class="orn">۞</span><span class="ar" id="dhikr"></span><span class="orn">۞</span></footer>
@@ -111,6 +115,14 @@
     <div class="ov-head"><span class="ov-title"><span class="t-ar ar">الخلفيات</span><span class="t-en">Backgrounds</span></span><span class="ov-count" id="galCount"></span></div>
     <div class="gal-grid" id="galGrid"></div>
     <div class="ov-hint"><span class="t-ar ar"><b>OK</b> اختيار / إلغاء &nbsp;&nbsp; <b class="yel">●</b> هذه فقط &nbsp;&nbsp; <b class="grn">●</b> الكل &nbsp;&nbsp; <b>BACK</b> حفظ</span><span class="t-en"><b>OK</b> Toggle &nbsp;&nbsp; <b class="yel">●</b> Only this &nbsp;&nbsp; <b class="grn">●</b> All &nbsp;&nbsp; <b>BACK</b> Save</span></div>
+  </div>
+
+  <!-- The Quran player: every surah, favourites, what is playing. Drawn by app.js -->
+  <div class="overlay" id="quranOverlay">
+    <div class="ov-head"><span class="ov-title"><span class="t-ar ar">القرآن الكريم</span><span class="t-en">The Quran</span></span><span class="ov-count" id="qCount"></span></div>
+    <div class="q-grid" id="qGrid"></div>
+    <div class="q-bar" id="qBar"></div>
+    <div class="ov-hint"><span class="t-ar ar"><b>OK</b> تشغيل / إيقاف مؤقت &nbsp;&nbsp; <b class="yel">●</b> مفضلة &nbsp;&nbsp; <b class="grn">●</b> المفضلة فقط / الكل &nbsp;&nbsp; <b class="red">●</b> القارئ &nbsp;&nbsp; <b class="blu">●</b> بعد السورة &nbsp;&nbsp; <b>BACK</b> رجوع</span><span class="t-en"><b>OK</b> Play / pause &nbsp;&nbsp; <b class="yel">●</b> Favourite &nbsp;&nbsp; <b class="grn">●</b> Favourites only / all &nbsp;&nbsp; <b class="red">●</b> Reciter &nbsp;&nbsp; <b class="blu">●</b> After a surah &nbsp;&nbsp; <b>BACK</b> Back</span></div>
   </div>
 
   <!-- Settings: sections on one side, their rows on the other; also the first-run setup. Drawn by app.js -->
@@ -139,6 +151,7 @@
 
 <script src="js/content.js"></script>
 <script src="js/cities.js"></script>
+<script src="js/quran.js"></script>
 <script src="js/backgrounds.js"></script>
 <!-- optional, yours only: your own photos (see README, "Your own photos"). Missing is fine. -->
 <script src="js/mine.js" onerror="void 0"></script>

@@ -6,9 +6,10 @@
  */
 (function () {
   'use strict';
-  var VERSION = '1.7.0';
+  var VERSION = '1.8.0';
   var C = window.NOOR_CONTENT;
   var CT = window.NOOR_CITIES || { countries: {}, cities: [] };
+  var QS = (window.NOOR_QURAN && window.NOOR_QURAN.surahs) || [];
   var IS_TIZEN = typeof window.tizen !== 'undefined' && window.tizen.application;
   var SELF_ID = IS_TIZEN ? safe(function () { return tizen.application.getCurrentApplication().appInfo.id; }) : 'noor';
 
@@ -17,7 +18,8 @@
   //   ?now=2027-02-20T17:30  shifts the clock      ?fresh=1  a new install (the first-run setup)
   //   ?look=scene            a layout: classic, centered, ambient or scene (skips the setup)
   //   ?bg=scene-night        stays on one photo    ?lang=en  or ar
-  //   ?open=look             opens Settings at a section (general, location, prayer, look, bg, screen, about)
+  //   ?open=look             opens Settings at a section (general, location, prayer, look, bg, screen, about),
+  //                          ?open=quran the Quran player
   var NOW_OFFSET = 0, FRESH = false, PREVIEW = {};
   (function () {
     if (IS_TIZEN) return;
@@ -96,7 +98,8 @@
   /* ---------------- settings ---------------- */
   var DEFAULTS = { loc: null, method: 'auto', hour12: true, hijriAdjust: 0, asrFactor: 1, alerts: true, preAlert: 0, adj: null, pinned: [],
     bgMode: 'time', bgSel: [], bgDur: 60, bgMotion: true, lang: 'ar', tiles: 'auto', greet: false, reciter: 'alafasy',
-    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false };
+    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false,
+    afterSurah: 'next', q: null, qFav: [] };
   var PRESETS = {
     classic:  { clockVis: 'always', clockStyle: 'large',  prVis: 'always', prStyle: 'arch',  cardVis: 'always', cardStyle: 'glass',   weatherVis: 'always', dhikrVis: 'always' },
     centered: { clockVis: 'always', clockStyle: 'center', prVis: 'always', prStyle: 'strip', cardVis: 'always', cardStyle: 'minimal', weatherVis: 'always', dhikrVis: 'off' },
@@ -113,6 +116,8 @@
     PRAYER_KEYS.forEach(function (p) { if (typeof s.adj[p] !== 'number') s.adj[p] = 0; });
     if (!(s.bgSel instanceof Array)) s.bgSel = [];
     if (!(s.pinned instanceof Array)) s.pinned = [];
+    if (!(s.qFav instanceof Array)) s.qFav = [];
+    if (!s.q || typeof s.q.n !== 'number') s.q = null;
     if (!s.loc || typeof s.loc.lat !== 'number' || typeof s.loc.lng !== 'number') {
       s.loc = copy(LEGACY_CITY[s.cityId] || guessCity() || LEGACY_CITY.makkah);
     }
@@ -403,10 +408,14 @@
   }
 
   /* ---------------- settings button (appears on any key press) ---------------- */
-  var focusIdx = 0, zone = 'gear';
+  /* The home's two buttons: the Quran player and Settings. hIdx: 0 Quran, 1 Settings. */
+  var focusIdx = 0, zone = 'gear', hIdx = 0;
   function buildTiles() { paintFocus(); }
-  function paintFocus() { $('gear').className = 'gear' + (zone === 'gear' ? ' focus' : ''); }
-  function activate() { openSettings(); }
+  function paintFocus() {
+    $('quranBtn').className = 'gear' + (zone === 'gear' && hIdx === 0 ? ' focus' : '');
+    $('gear').className = 'gear' + (zone === 'gear' && hIdx === 1 ? ' focus' : '');
+  }
+  function activate() { if (hIdx === 0) openQuran(); else openSettings(); }
 
   /* ---------------- all apps overlay ---------------- */
   var mode = 'home', aIdx = 0, aNodes = [], COLS = 6;
@@ -474,6 +483,7 @@
   var NIGHT = [['off', 'إيقاف', 'Off'], ['dim', 'تخفيف الإضاءة', 'Dim'], ['ambient', 'الساعة فقط', 'Clock only'], ['both', 'الساعة فقط + تخفيف', 'Clock only + dim']];
   var IDLE_ACT = [['dim', 'تخفيف الإضاءة', 'Dim'], ['clock', 'الساعة فقط', 'Clock only'], ['both', 'الساعة فقط + تخفيف', 'Clock only + dim']];
   var IDLE_MIN = [0, 5, 10, 15, 30, 60], PRE_MIN = [0, 5, 10, 15, 20, 30];
+  var AFTER = [['next', 'السورة التالية', 'Next surah'], ['stop', 'توقف', 'Stop'], ['repeat', 'إعادة السورة', 'Repeat it'], ['shuffle', 'سورة عشوائية', 'Shuffle']];
   var GLASS_T = [['ضبابي', 'Frosted'], ['ناعم', 'Soft'], ['متوازن', 'Balanced'], ['شفاف', 'Clear'], ['شفاف جدًا', 'Very clear']];
   var DURS = [20, 40, 60, 120, 300, 600, 1800, 0];   // 0 = never change
 
@@ -512,7 +522,9 @@
       { kind: 'cycle', key: 'reciter', label: ['القارئ', 'Reciter'], sub: ['لسور بطاقة المناسبات (الكهف، الملك، البقرة)', 'For the surahs on the occasion card (Al-Kahf, Al-Mulk, Al-Baqarah)'],
         value: [reciter().ar, reciter().en],
         step: function (d) { var i = 0; C.reciters.forEach(function (r, k) { if (r.id === S.reciter) i = k; });
-          S.reciter = C.reciters[(i + d + C.reciters.length) % C.reciters.length].id; touched('audio'); if (playingKey && C.audio[playingKey].surah) audioStop(); } },
+          S.reciter = C.reciters[(i + d + C.reciters.length) % C.reciters.length].id; touched('audio'); if (track && track.n) stopAudio(); } },
+      { kind: 'cycle', key: 'afterSurah', label: ['بعد انتهاء السورة', 'After a surah'], sub: ['في مشغّل القرآن', 'In the Quran player'], value: optText(AFTER, S.afterSurah),
+        step: function (d) { S.afterSurah = cyc(AFTER.map(function (a) { return a[0]; }), S.afterSurah, d); touched('audio'); } },
       head(['الشاشة الرئيسية', 'Home']),
       { kind: 'cycle', key: 'greet', label: ['التحية والشعار', 'Greeting & logo'], value: S.greet ? ['ظاهر', 'Shown'] : ['مخفي', 'Hidden'],
         step: function () { S.greet = !S.greet; touched('look'); applyBody(); } }
@@ -957,7 +969,7 @@
   function closeOverlays() {
     if (mode === 'gallery') { saveSettings(); $('galOverlay').className = 'overlay'; mode = 'settings'; SET.focusKey = 'gallery'; SET.dirty.bg = true; paintSettings(true); return; }
     if (mode === 'settings') { setBack(); if (mode === 'settings') paintSettings(true); return; }
-    $('appsOverlay').className = 'overlay'; $('galOverlay').className = 'overlay';
+    $('appsOverlay').className = 'overlay'; $('galOverlay').className = 'overlay'; $('quranOverlay').className = 'overlay';
     mode = 'home'; buildTiles(); applyBody(); renderActions();
   }
 
@@ -1141,41 +1153,218 @@
   function onlyThisBg() { S.bgSel = [BGS[gIdx].id]; paintGallery(); nextBackground(S.bgSel[0]); toast(T('خلفية واحدة فقط', 'Only this background')); }
   function allBgs() { S.bgSel = []; paintGallery(); toast(T('كل الخلفيات', 'All backgrounds')); }
 
-  /* ---------------- audio ---------------- */
-  var player = null, playingKey = null, srcIdx = 0;
+  /* ---------------- the Quran player ----------------
+     One track at a time: a surah { n: 1..114, list: 'all' | 'fav' } or a clip { clip: 'takbeer' }.
+     Surahs stream from the reciter's folder on mp3quran.net, with Al Quran Cloud as a backup where
+     it has that reciter. When a surah ends the next one starts (Settings, General, After a surah).
+     Where you stopped is kept (S.q), so "Continue" picks it up; nothing ever starts by itself. */
+  var player = null, track = null, srcIdx = 0, fails = 0, resumeAt = 0, lastSaved = -1, lastShown = -1;
   function reciter() { for (var i = 0; i < C.reciters.length; i++) if (C.reciters[i].id === S.reciter) return C.reciters[i]; return C.reciters[0]; }
-  function audioUrls(key) {
-    var a = C.audio[key];
-    if (a.urls) return a.urls;
-    var r = reciter(), n = ('00' + a.surah).slice(-3), u = [r.mp3 + n + '.mp3'];
-    if (r.cdn) u.push('https://cdn.islamic.network/quran/audio-surah/128/' + r.cdn + '/' + a.surah + '.mp3');
+  function surah(n) { return QS[n - 1] || null; }
+  function trackTitle(t) {
+    if (t.clip) return [C.audio[t.clip].ar, C.audio[t.clip].en];
+    var q = surah(t.n);
+    return ['سورة ' + q[1], q[2]];
+  }
+  function trackUrls(t) {
+    if (t.clip) return C.audio[t.clip].urls;
+    var r = reciter(), u = [r.mp3 + ('00' + t.n).slice(-3) + '.mp3'];
+    if (r.cdn) u.push('https://cdn.islamic.network/quran/audio-surah/128/' + r.cdn + '/' + t.n + '.mp3');
     return u;
   }
-  function audioToggle(key) {
-    player = player || $('player');
-    if (playingKey === key && !player.paused) { player.pause(); renderActions(); return; }
-    if (playingKey !== key) { playingKey = key; srcIdx = 0; player.src = audioUrls(key)[0]; }
-    var pr = player.play();
-    if (pr && pr['catch']) pr['catch'](function () {});
-    var A = C.audio[key], R = reciter();
-    toast('▶ ' + T(A.ar + (A.surah ? ' · ' + R.ar : ''), A.en + (A.surah ? ' · ' + R.en : '')));
-    renderActions();
+  function fmtDur(x) {
+    x = Math.max(0, Math.floor(x || 0));
+    var h = Math.floor(x / 3600), m = Math.floor(x / 60) % 60;
+    return (h ? h + ':' + pad(m) : m) + ':' + pad(x % 60);
   }
-  function audioStop() { if (player) { player.pause(); player.removeAttribute('src'); } playingKey = null; renderActions(); }
+  function isPlaying() { return !!track && !!player && !player.paused; }
+  function startAudio() { var pr = player.play(); if (pr && pr['catch']) pr['catch'](function () {}); }
+  // the surahs a list plays, in mushaf order
+  function listOrder(list) {
+    if (list === 'fav' && S.qFav.length) return S.qFav.slice().sort(function (x, y) { return x - y; });
+    return QS.map(function (q) { return q[0]; });
+  }
+  function neighbour(dir) {
+    if (!track || !track.n) return 0;
+    var o = listOrder(track.list), i = o.indexOf(track.n);
+    if (i < 0) { for (i = 0; i < o.length && o[i] < track.n; i++); return dir > 0 ? (o[i] || 0) : (o[i - 1] || 0); }
+    return o[i + dir] || 0;
+  }
+  function remember() {
+    if (!track || !track.n || !player) return;
+    S.q = { n: track.n, t: Math.floor(player.currentTime || 0), list: track.list };
+    lastSaved = S.q.t;
+    saveSettings();
+  }
+  function playTrack(t, from) {
+    player = player || $('player');
+    if (track && track.n && !t.auto) remember();
+    track = t; srcIdx = 0; resumeAt = from > 5 ? from : 0; lastShown = -1;
+    player.src = trackUrls(t)[0];
+    startAudio();
+    var tt = trackTitle(t), R = reciter();
+    if (!t.auto) toast('▶ ' + T(tt[0] + (t.n ? ' · ' + R.ar : ''), tt[1] + (t.n ? ' · ' + R.en : '')) + (resumeAt ? ' <small>' + fmtDur(resumeAt) + '</small>' : ''));
+    if (t.n) { S.q = { n: t.n, t: resumeAt, list: t.list }; saveSettings(); }
+    audioChanged();
+  }
+  function playSurah(n, from, list, auto) { if (surah(n)) playTrack({ n: n, list: list === 'fav' ? 'fav' : 'all', auto: !!auto }, from); }
+  // where you stopped, or the start of the Quran
+  function resumeLast() { var q = S.q; if (q && surah(q.n)) playSurah(q.n, q.t, q.list); else playSurah(1); }
+  function togglePlay() {
+    if (!track) { resumeLast(); return; }
+    if (player.paused) startAudio(); else { player.pause(); remember(); }
+    audioChanged();
+  }
+  function stepSurah(dir) {
+    if (!track || !track.n) { if (!track) resumeLast(); return; }
+    var n = neighbour(dir);
+    if (n) playSurah(n, 0, track.list);
+    else toast(dir > 0 ? T('هذه آخر سورة', 'This is the last surah') : T('هذه أول سورة', 'This is the first surah'));
+  }
+  function seekAudio(sec) {
+    if (!track || !player || !player.duration) return;
+    player.currentTime = Math.max(0, Math.min(player.duration - 1, player.currentTime + sec));
+    paintAudio(true);
+  }
+  function stopAudio() {
+    if (player && track) { remember(); player.pause(); player.removeAttribute('src'); }
+    track = null; audioChanged();
+  }
+  function toggleFav(n) {
+    var k = S.qFav.indexOf(n);
+    if (k === -1) S.qFav.push(n); else S.qFav.splice(k, 1);
+    saveSettings();
+  }
+  function audioChanged() { applyBody(); renderActions(); paintAudio(true); if (mode === 'quran') paintQuran(); }
+  // the now-playing bar on the home, the bar in the player, the card's progress line
+  function paintAudio(force) {
+    var bar = $('nowBar');
+    if (!track) { if (force) { bar.innerHTML = ''; paintQBar(); } return; }
+    var sec = Math.floor(player.currentTime || 0);
+    if (!force && sec === lastShown) return;
+    lastShown = sec;
+    var tt = trackTitle(track), R = reciter(), dur = player.duration || 0, pct = dur ? (100 * player.currentTime / dur).toFixed(2) : 0;
+    bar.innerHTML = (isPlaying() ? PLAY_IC : PAUSE_IC).replace('#10221f', 'currentColor') +
+      '<span class="nb-text"><b>' + T(esc(tt[0]), esc(tt[1])) + '</b><small>' + (track.n ? T(esc(R.ar), esc(R.en)) + ' · ' : '') + fmtDur(sec) + (dur ? ' / ' + fmtDur(dur) : '') + '</small></span>' +
+      '<span class="nb-line"><i style="width:' + pct + '%"></i></span>';
+    $('occProg').style.width = pct + '%';
+    paintQBar();
+    if (track.n && Math.abs(sec - lastSaved) >= 10 && isPlaying()) remember();
+  }
   (function wireAudio() {
     var a = $('player');
+    a.addEventListener('loadedmetadata', function () {
+      if (resumeAt && a.duration && resumeAt < a.duration - 10) a.currentTime = resumeAt;
+      resumeAt = 0;
+    });
+    a.addEventListener('playing', function () { fails = 0; audioChanged(); });
+    a.addEventListener('pause', function () { if (track) audioChanged(); });
     a.addEventListener('error', function () {
-      if (!playingKey) return;
-      var urls = audioUrls(playingKey);
-      if (++srcIdx < urls.length) { a.src = urls[srcIdx]; a.play(); }
-      else { toast(T('تعذّر تشغيل الصوت', 'Audio unavailable')); playingKey = null; renderActions(); }
+      if (!track) return;
+      var urls = trackUrls(track);
+      if (++srcIdx < urls.length) { a.src = urls[srcIdx]; startAudio(); return; }
+      var tt = trackTitle(track), t = track;
+      fails++;
+      toast(T('تعذّر تشغيل ' + tt[0], tt[1] + ' could not be played'));
+      // carrying on by itself: skip a surah that will not play, but not for ever with no internet
+      if (t.auto && t.n && fails < 3) { var nx = neighbour(1); if (nx) { playSurah(nx, 0, t.list, true); return; } }
+      track = null; audioChanged();
     });
-    a.addEventListener('ended', function () { playingKey = null; renderActions(); });
-    a.addEventListener('timeupdate', function () {
-      var bar = $('occProg');
-      if (a.duration) bar.style.width = (100 * a.currentTime / a.duration).toFixed(2) + '%';
+    a.addEventListener('ended', function () {
+      if (!track) return;
+      var t = track, next = 0;
+      if (!t.n) { track = null; audioChanged(); return; }
+      if (S.afterSurah === 'repeat') next = t.n;
+      else if (S.afterSurah === 'shuffle') { var o = listOrder(t.list); next = o[Math.floor(Math.random() * o.length)]; if (o.length > 1) while (next === t.n) next = o[Math.floor(Math.random() * o.length)]; }
+      else next = neighbour(1);
+      if (S.afterSurah === 'stop' || !next) {   // "Continue" then offers what comes next
+        S.q = { n: next || listOrder(t.list)[0] || 1, t: 0, list: t.list }; saveSettings();
+        track = null; audioChanged(); return;
+      }
+      playSurah(next, 0, t.list, true);
     });
+    a.addEventListener('timeupdate', function () { paintAudio(false); });
   })();
+
+  /* ---------------- the Quran player screen: every surah, favourites, what is playing ---------------- */
+  var qIdx = 0, qNodes = [], qItems = [], qList = 'all', QCOLS = 6;
+  function openQuran() {
+    mode = 'quran';
+    if (qList === 'fav' && !S.qFav.length) qList = 'all';
+    buildQuran((track && track.n) || (S.q && S.q.n) || 1);
+    $('quranOverlay').className = 'overlay open';
+    paintQuran();
+  }
+  function buildQuran(focusN) {
+    var g = $('qGrid'); g.innerHTML = ''; var sc = el('div', 'scroller'); g.appendChild(sc); qNodes = [];
+    qItems = listOrder(qList);
+    qItems.forEach(function (n, i) {
+      var q = surah(n);
+      var d = el('div', 'qtile', '<span class="qn">' + (S.lang === 'ar' ? arDigits(n) : n) + '</span><span class="qt"><b class="ar">' + esc(q[1]) + '</b><small>' + esc(q[2]) + ' · ' +
+        T(arDigits(q[3]) + ' آية', q[3] + ' ayahs') + '</small></span><span class="qf">★</span><span class="qp"></span>');
+      d.onclick = function () { qIdx = i; quranOk(); };
+      sc.appendChild(d); qNodes.push(d);
+    });
+    qIdx = Math.max(0, qItems.indexOf(focusN));
+  }
+  function paintQuran() {
+    qNodes.forEach(function (nd, i) {
+      var n = qItems[i];
+      setCls(nd, 'qtile' + (i === qIdx ? ' focus' : '') + (track && track.n === n ? (isPlaying() ? ' playing' : ' paused') : '') + (S.qFav.indexOf(n) !== -1 ? ' fav' : ''));
+    });
+    var row = Math.floor(qIdx / QCOLS), sc = $('qGrid').firstChild;
+    var y = Math.max(0, row - 2) * 124;
+    if (sc) sc.style.transform = sc.style.webkitTransform = 'translateY(' + (-y) + 'px)';
+    $('qCount').innerHTML = qList === 'fav' ? T('المفضلة · ' + arDigits(qItems.length), 'Favourites · ' + qItems.length) : T('كل السور · ' + arDigits(S.qFav.length) + ' مفضلة', 'All surahs · ' + S.qFav.length + ' favourites');
+    paintQBar();
+  }
+  function paintQBar() {
+    if (mode !== 'quran') return;
+    var R = reciter(), after = optText(AFTER, S.afterSurah), html;
+    if (track) {
+      var tt = trackTitle(track), dur = player.duration || 0, pct = dur ? (100 * player.currentTime / dur).toFixed(2) : 0;
+      html = '<span class="qb-ic">' + (isPlaying() ? PLAY_IC : PAUSE_IC).replace('#10221f', 'currentColor') + '</span><span class="qb-text"><b>' + T(esc(tt[0]), esc(tt[1])) + '</b><small>' +
+        (track.n ? T(esc(R.ar), esc(R.en)) + ' · ' : '') + T('بعدها: ' + after[0], 'Then: ' + after[1]) + '</small></span><span class="qb-time">' + fmtDur(player.currentTime) + (dur ? ' / ' + fmtDur(dur) : '') +
+        '</span><span class="qb-line"><i style="width:' + pct + '%"></i></span>';
+    } else {
+      var q = S.q && surah(S.q.n);
+      html = '<span class="qb-text"><b>' + (q ? T('توقفت عند سورة ' + esc(q[1]) + (S.q.t > 5 ? ' · ' + fmtDur(S.q.t) : ''), 'You stopped at ' + esc(q[2]) + (S.q.t > 5 ? ' · ' + fmtDur(S.q.t) : '')) : T('اختر سورة واضغط OK', 'Pick a surah and press OK')) +
+        '</b><small>' + T(esc(R.ar), esc(R.en)) + ' · ' + T('بعدها: ' + after[0], 'Then: ' + after[1]) + '</small></span>';
+    }
+    $('qBar').innerHTML = html;
+  }
+  // OK on a surah: the one playing pauses and carries on; the one you stopped at resumes; any other starts
+  function quranOk() {
+    var n = qItems[qIdx];
+    if (!n) return;
+    if (track && track.n === n) togglePlay();
+    else playSurah(n, S.q && S.q.n === n ? S.q.t : 0, qList);
+    paintQuran();
+  }
+  function quranKey(k) {
+    var n = qItems.length, fwd = S.lang === 'ar' ? K.LEFT : K.RIGHT;   // in Arabic the grid runs right to left
+    if (k === K.LEFT || k === K.RIGHT) qIdx = Math.max(0, Math.min(n - 1, qIdx + (k === fwd ? 1 : -1)));
+    else if (k === K.UP) qIdx = Math.max(0, qIdx - QCOLS);
+    else if (k === K.DOWN) qIdx = Math.min(n - 1, qIdx + QCOLS);
+    else if (k === K.ENTER) return quranOk();
+    else if (k === K.YELLOW || k === K.Y) {
+      toggleFav(qItems[qIdx]);
+      if (qList === 'fav') { var keep = qItems[Math.min(qIdx + 1, n - 1)]; if (!S.qFav.length) qList = 'all'; buildQuran(keep); }
+    }
+    else if (k === K.GREEN || k === K.G) {
+      if (qList === 'all' && !S.qFav.length) { toast(T('لا مفضلة بعد. الزر الأصفر يضيف سورة', 'No favourites yet. The yellow button adds a surah')); return; }
+      var cur = qItems[qIdx]; qList = qList === 'all' ? 'fav' : 'all'; buildQuran(cur);
+    }
+    else if (k === K.RED || k === K.R) {
+      var i = 0; C.reciters.forEach(function (r, x) { if (r.id === S.reciter) i = x; });
+      S.reciter = C.reciters[(i + 1) % C.reciters.length].id; saveSettings();
+      toast(T('القارئ: ' + reciter().ar, 'Reciter: ' + reciter().en));
+      if (track && track.n) playTrack({ n: track.n, list: track.list, auto: true }, 0);
+    }
+    else if (k === K.BLUE || k === K.B) { S.afterSurah = cyc(AFTER.map(function (a) { return a[0]; }), S.afterSurah, 1); saveSettings(); }
+    else return;
+    paintQuran();
+  }
 
   /* ---------------- occasions ---------------- */
   var occ = null, occKey = '', aFocus = 0;
@@ -1198,7 +1387,7 @@
     if (key === occKey) return;
     occKey = key;
     var card = $('occCard');
-    if (!c) { card.className = 'occ-card'; $('ayahCard').className = 'ayah-card'; if (zone === 'card') { zone = 'gear'; paintFocus(); } return; }
+    if (!c) { card.className = 'occ-card'; $('ayahCard').className = 'ayah-card'; aFocus = 0; renderActions(); return; }
     $('ayahCard').className = 'ayah-card hide';
     card.className = 'occ-card show tone-' + c.tone;
     $('occTitle').innerHTML = esc(c.title);
@@ -1211,17 +1400,42 @@
     aFocus = 0;
     renderActions();
   }
+  // The card's buttons. An occasion keeps its own suggestion (Al-Kahf on Friday, Al-Mulk at night,
+  // the takbeer on Eid); otherwise the verse card offers to carry on where you stopped. Every card
+  // ends with the button that opens the whole list.
+  var LIST_IC = '<svg class="ic" viewBox="0 0 30 30"><path d="M7 9h16M7 15h16M7 21h10" fill="none" stroke="#10221f" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  function cardActions() {
+    var list = [];
+    if (occ && occ.actions) occ.actions.forEach(function (a) { var A = C.audio[a.audio]; list.push({ label: a.label, n: A.surah || 0, clip: A.surah ? '' : a.audio }); });
+    else list.push({ resume: true });
+    list.push({ open: true });
+    return list;
+  }
+  function actionOn(a) { return isPlaying() && (a.resume ? !!track.n : a.n ? track.n === a.n : track.clip === a.clip); }
+  function actionGo(a) {
+    if (a.open) return openQuran();
+    if (a.resume) return track && track.n ? togglePlay() : resumeLast();
+    if (track && (a.n ? track.n === a.n : track.clip === a.clip)) return togglePlay();
+    if (a.n) playSurah(a.n, S.q && S.q.n === a.n ? S.q.t : 0); else playTrack({ clip: a.clip });
+  }
   function renderActions() {
-    var box = $('occActions'); box.innerHTML = '';
-    if (!occ || !occ.actions) return;
-    occ.actions.forEach(function (a, i) {
-      var on = playingKey === a.audio && player && !player.paused;
-      var b = el('div', 'occ-btn' + (on ? ' playing' : '') + (zone === 'card' && i === aFocus ? ' focus' : ''),
-        (on ? PAUSE_IC : PLAY_IC) + '<span class="ar">' + esc(on ? 'إيقاف مؤقت' : a.label + (C.audio[a.audio].surah ? ' · ' + reciter().ar : '')) + '</span>');
-      b.onclick = function () { audioToggle(a.audio); };
+    var acts = cardActions(), box = $(occ ? 'occActions' : 'ayahActions');
+    $(occ ? 'ayahActions' : 'occActions').innerHTML = ''; box.innerHTML = '';
+    aFocus = Math.min(aFocus, acts.length - 1);
+    acts.forEach(function (a, i) {
+      var on = actionOn(a), html;
+      if (a.open) html = LIST_IC + T('كل السور', 'All surahs');
+      else if (on) html = PAUSE_IC + T('إيقاف مؤقت', 'Pause');
+      else if (a.resume) {
+        var cur = track && track.n ? track.n : (S.q && surah(S.q.n) ? S.q.n : 0), q = surah(cur || 1);
+        html = PLAY_IC + (cur ? T('متابعة: سورة ' + esc(q[1]), 'Continue: ' + esc(q[2])) : T('ابدأ: سورة الفاتحة', 'Start: Al-Fatihah'));
+      }
+      else html = PLAY_IC + '<span class="ar">' + esc(a.label + (a.n ? ' · ' + reciter().ar : '')) + '</span>';
+      var b = el('div', 'occ-btn' + (a.open ? ' ghost' : '') + (on ? ' playing' : '') + (zone === 'card' && i === aFocus ? ' focus' : ''), html);
+      b.onclick = function () { actionGo(a); };
       box.appendChild(b);
     });
-    $('occCard').querySelector('.occ-progress').className = 'occ-progress' + (playingKey ? ' on' : '');
+    $('occCard').querySelector('.occ-progress').className = 'occ-progress' + (track ? ' on' : '');
   }
   function tickOccasionCount(now) {
     if (!occ || !occ.countTo) return;
@@ -1237,6 +1451,7 @@
     if (!S.greet) c.push('no-greet');
     if (awake) c.push('awake');
     if (awake) c.push('tiles-shown');
+    if (track) c.push('has-audio');
     // quiet: after Isha (night mode) or after a while with no button pressed (idle)
     var dim = (isNight && (S.night === 'dim' || S.night === 'both')) || (idle && (S.idleAct === 'dim' || S.idleAct === 'both'));
     var amb = (isNight && (S.night === 'ambient' || S.night === 'both')) || (idle && (S.idleAct === 'clock' || S.idleAct === 'both'));
@@ -1283,9 +1498,11 @@
 
   /* ---------------- remote keys ---------------- */
   var K = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13, BACK: 10009, ESC: 27, BKSP: 8, YELLOW: 405, Y: 89, GREEN: 404, G: 71, PLAYPAUSE: 10252, PLAY: 415, PAUSE: 19, STOP: 413,
-    PGUP: 33, PGDN: 34, CHUP: 427, CHDN: 428 };
+    PGUP: 33, PGDN: 34, CHUP: 427, CHDN: 428,
+    RED: 403, R: 82, BLUE: 406, B: 66, NEXT: 10233, PREV: 10232, FF: 417, RW: 412, N: 78, P: 80, DOT: 190, COMMA: 188 };
   if (IS_TIZEN && tizen.tvinputdevice) {
-    ['ColorF0Red', 'ColorF1Green', 'ColorF2Yellow', 'ColorF3Blue', 'MediaPlayPause', 'MediaPlay', 'MediaPause', 'MediaStop'].forEach(function (k) { safe(function () { tizen.tvinputdevice.registerKey(k); }); });
+    ['ColorF0Red', 'ColorF1Green', 'ColorF2Yellow', 'ColorF3Blue', 'MediaPlayPause', 'MediaPlay', 'MediaPause', 'MediaStop',
+      'MediaTrackNext', 'MediaTrackPrevious', 'MediaFastForward', 'MediaRewind'].forEach(function (k) { safe(function () { tizen.tvinputdevice.registerKey(k); }); });
   }
   document.addEventListener('keydown', function (e) {
     var k = e.keyCode;
@@ -1298,25 +1515,31 @@
       else if (IS_TIZEN) safe(function () { tizen.application.getCurrentApplication().hide(); });
       return;
     }
-    if (k === K.STOP) return audioStop();
+    // the remote's media keys work everywhere: on the home, in the player, in Settings
+    if (k === K.STOP) return stopAudio();
     if (k === K.PLAYPAUSE || k === K.PLAY || k === K.PAUSE) {
-      if (playingKey) return audioToggle(playingKey);
-      if (occ && occ.actions && occ.actions[0]) return audioToggle(occ.actions[0].audio);
-      return;
+      if (!track && occ && occ.actions && occ.actions[0]) return actionGo(cardActions()[0]);   // the occasion's own suggestion
+      return togglePlay();
     }
+    if (k === K.NEXT || k === K.PREV) return stepSurah(k === K.NEXT ? 1 : -1);
+    if (k === K.FF || k === K.RW) return seekAudio(k === K.FF ? 30 : -30);
+    if (mode !== 'settings' && (k === K.N || k === K.P)) return stepSurah(k === K.N ? 1 : -1);          // keyboard stand-ins, for a browser
+    if (mode !== 'settings' && (k === K.DOT || k === K.COMMA)) return seekAudio(k === K.DOT ? 30 : -30);
     if (mode === 'home') {
       var wasAwake = awake;
       wake();
       if (!wasAwake && zone === 'gear' && k !== K.UP && k !== K.ENTER) { paintFocus(); return; }
-      var hasCard = occ && occ.actions && occ.actions.length && S.w.cardVis !== 'off';
+      var acts = cardActions(), hasCard = S.w.cardVis !== 'off';
       if (zone === 'card') {
         // card buttons are laid out right-to-left
-        if (k === K.LEFT) aFocus = Math.min(occ.actions.length - 1, aFocus + 1);
+        if (k === K.LEFT) aFocus = Math.min(acts.length - 1, aFocus + 1);
         else if (k === K.RIGHT) aFocus = Math.max(0, aFocus - 1);
         else if (k === K.DOWN) zone = 'gear';
-        else if (k === K.ENTER) return audioToggle(occ.actions[aFocus].audio);
+        else if (k === K.ENTER) return actionGo(acts[aFocus]);
       } else {
         if (k === K.UP && hasCard) zone = 'card';
+        else if (k === K.LEFT) hIdx = 0;
+        else if (k === K.RIGHT) hIdx = 1;
         else if (k === K.ENTER) return activate();
       }
       paintFocus(); renderActions();
@@ -1332,6 +1555,9 @@
     } else if (mode === 'settings') {
       if ([K.LEFT, K.RIGHT, K.UP, K.DOWN, K.PGUP, K.PGDN].indexOf(k) >= 0) e.preventDefault();
       setKey(k);
+    } else if (mode === 'quran') {
+      if ([K.LEFT, K.RIGHT, K.UP, K.DOWN].indexOf(k) >= 0) e.preventDefault();
+      quranKey(k);
     } else if (mode === 'gallery') {
       var gn = BGS.length;
       if (k === K.LEFT) gIdx = Math.max(0, gIdx - 1);
@@ -1348,7 +1574,7 @@
   // Back from another app, or the TV woke with Noor still open: the day, the times and the
   // countdown are worked out again straight away.
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) return;
+    if (document.hidden) { remember(); return; }
     today = null; nx = null; tick(); checkNight(true); armIdle();
   });
 
@@ -1365,10 +1591,14 @@
   rotateDhikr();
   setInterval(rotateDhikr, 15000);
   buildTiles();
+  renderActions();
+  $('quranBtn').onclick = function () { hIdx = 0; openQuran(); };
+  $('gear').onclick = function () { hIdx = 1; openSettings(); };
   wireSettingsPointer();
   armIdle();
   setTimeout(loadWeather, 1500);
   setInterval(loadWeather, 30 * 60000);
   if (!S.setup) startWizard();
+  else if (PREVIEW.open === 'quran') openQuran();
   else if (PREVIEW.open) { openSettings(); SECS.forEach(function (sc, i) { if (sc[0] === PREVIEW.open) SET.sec = i; }); paintSettings(true); }
 })();
