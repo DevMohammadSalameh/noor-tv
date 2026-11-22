@@ -99,9 +99,12 @@ Noor may have to be chosen again.
 There is no setting for this that has been tried with Noor. The person opens Noor from the row of
 apps; moving it to the front of the row (hold OK on it, then move) keeps it one press away.
 
-Noor does nothing about LG's screensaver, so after some minutes without a button press the TV
-will probably show its own instead of Noor. On an OLED, whose makers warn about still pictures,
-that is the safer behaviour; Noor's own Settings, Screen has dimming and a gentle shift as well.
+LG does not let an app start itself over another app when the TV is idle. While Noor is showing,
+it asks the TV not to start LG's screensaver over it (**Settings, Screen, Keep Noor on screen**
+inside Noor, on by default). That request is written from LG's documentation and has not been
+seen working: if LG's screensaver still appears after a few minutes, say so in the issue. On an
+OLED, whose makers warn about still pictures, consider switching that setting off, or use Noor's
+dimming and gentle shift in the same place.
 
 ## The remote
 

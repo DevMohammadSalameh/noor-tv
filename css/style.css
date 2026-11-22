@@ -640,3 +640,5 @@ body:not(.awake).vis-clock-press .bg.sc .gclock { opacity: 0; }
 .qtile.here { border-color: var(--hi); }
 #quranOverlay .qopt .ar, #quranOverlay .qopt .t-en { font-size: inherit; color: inherit; margin: 0; letter-spacing: 0; }
 .lang-ar #quranOverlay .ov-count { -webkit-flex-direction: row-reverse; flex-direction: row-reverse; }
+/* Noor as the Android screensaver: the home with nothing to press */
+.dream .tiles, .dream .occ-actions, .dream .now-bar, .dream .overlay { display: none !important; }

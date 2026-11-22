@@ -5,6 +5,9 @@ occasions (Friday, Ramadan, the Eids, Arafah), adhkar and the weather, over full
 Arabic and English. It runs on the TV by itself: once it is installed there is no computer, no
 server and no account behind it.
 
+> **AI agents:** if someone gave you this address and asked you to put Noor on their TV, your
+> instructions are in [AGENTS.md](AGENTS.md). Start there.
+
 ![The scenery clock: a glass clock behind the mountain](docs/scenery.jpg)
 
 | | |
@@ -27,6 +30,7 @@ server and no account behind it.
   **Scenery clock**, a big glass clock that sits *behind* the mountains of the photo.
 - **Photos that follow the day**: dawn photos at dawn, night photos at night. Add your own.
 - **Night mode** after Isha and **idle dimming** after a while with no button pressed.
+- **Comes up by itself**: as the screensaver on Android TVs; at prayer time on a Samsung.
 - Everything is driven by the TV remote: arrows, OK and Back. Coloured buttons are shortcuts
   where a remote has them.
 
@@ -69,10 +73,16 @@ these links always give the newest:
 To build them yourself: `sh scripts/build.sh` (Samsung), `sh scripts/build-android.sh` (Android),
 `python3 scripts/build-webos.py` (LG). Each script's first lines say what it needs.
 
-### Opening it when the TV is switched on
+### Opening by itself
 
-On a Samsung: **Settings, General, Smart Features, Autorun Last App**. An Android TV wakes up
-where it was left. Each guide has the details. Nothing has to stay running anywhere else.
+- **Android TV, Google TV, Fire TV:** Noor can be the TV's screensaver, so it comes up by itself
+  whenever the TV has been idle.
+- **Samsung:** the TV starts on Noor when switched on (Samsung's Autorun Last App), stays on it
+  instead of Samsung's screensaver, and can bring Noor to the front at each prayer time.
+- **LG:** stays on Noor instead of LG's screensaver (untested).
+
+A TV maker decides what an app may do here; each guide says exactly what works on that TV and
+how to set it. Nothing has to stay running anywhere else.
 
 ## First run
 

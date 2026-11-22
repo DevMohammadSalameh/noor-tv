@@ -8,7 +8,20 @@ The person you are helping is assumed to be **non-technical**. You do the comput
 only what needs hands: pressing buttons on the TV and signing in to their own accounts. Speak in
 plain words, ask one or two things at a time, and wait for each answer.
 
-Work through these six steps in order.
+Work through these steps in order.
+
+## 0. Start here
+
+If all you were given is this repository's address, get it onto the computer you run on:
+`git clone https://github.com/DevMohammadSalameh/noor-tv` (without git: download and unpack
+`https://github.com/DevMohammadSalameh/noor-tv/archive/refs/heads/main.zip`). Run every command in
+these guides from inside that folder.
+
+If you cannot run commands at all (you are a chat assistant on someone's phone), you can still
+guide: read the guides from the repository's web pages. Only the Android row's "Way B" needs no
+computer.
+
+**Done when** you can read `docs/` locally, or you have told the person you can only guide.
 
 ## 1. Find out which TV it is
 
@@ -92,9 +105,9 @@ With the person at the TV:
 
 ## 6. Hand over
 
-Tell them, briefly: how Noor opens when the TV is switched on (each guide's "Opening it
-automatically"), how to remove it (each guide's "Take it off"), and that a newer version is
-installed the same way.
+Offer the guide's "Opening it by itself" options and set up the ones they want: the screensaver
+on Android, Autorun Last App and the prayer-time option on Samsung. Then tell them, briefly, how
+to remove Noor (each guide's "Take it off") and that a newer version is installed the same way.
 
 If the TV was an LG or an Android TV, ask them to open an issue at
 https://github.com/DevMohammadSalameh/noor-tv/issues saying the model and how it went, and write

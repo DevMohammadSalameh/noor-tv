@@ -93,11 +93,25 @@ signed by anyone else would be refused; this step signs it for theirs.
 
 **Done when** the command ends with `Installed Noor` and the **Person** sees **Noor** in Apps.
 
-## Opening it automatically
+## Opening it by itself
 
-**Person**, on the TV: **Settings, General, Smart Features, Autorun Last App**, on. When Noor was
-the last app open before the TV was switched off, the TV starts on it. On newer models the same
-switch is under **Settings, All Settings, General & Privacy, Start Screen Option**.
+Samsung does not let an app start itself over another app or an HDMI input when the TV is idle.
+What Noor can do on a Samsung:
+
+- **Start on Noor when the TV is switched on.** Person, on the TV: **Settings, General, Smart
+  Features, Autorun Last App**, on (newer models: **Settings, All Settings, General & Privacy,
+  Start Screen Option**). When Noor was the last app open, the TV starts on it.
+- **Stay on Noor.** While Noor is showing, it asks the TV not to start Samsung's screensaver over
+  it (**Settings, Screen, Keep Noor on screen** inside Noor, on by default). Noor's own dimming
+  and gentle shift, in the same place, look after the screen.
+- **Come to the front at prayer time.** Inside Noor: **Settings, Prayer, Bring Noor to the front
+  at prayer time** (off by default). It uses Samsung's alarm feature to open Noor at each prayer
+  even when another app is on screen. The row below it, **Test it**, does the same one minute
+  after you press OK: press it, open another app, and wait. These rows only show on TVs that have
+  the alarm feature.
+
+The last two are new and unconfirmed: check them with the person (step 5 of AGENTS.md) and say in
+an issue what the TV did.
 
 ## If something goes wrong
 

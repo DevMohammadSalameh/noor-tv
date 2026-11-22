@@ -128,12 +128,35 @@ It is in the TV's list of apps: on Google TV under **Apps, Your apps** (hold OK 
 the favourites row on the home); on Fire TV under **Your Apps & Channels** (press the menu button
 on it and choose **Move to front**).
 
-## Opening it automatically
+## Opening it by itself when the TV is idle
 
-An Android TV usually goes to sleep when switched off, rather than shutting down. If Noor was on
-screen, it is on screen again when the TV wakes. After a full restart (a power cut), open it from
-the apps list once. Noor keeps the TV from starting its screensaver while it is showing; **Settings,
-Screen, Keep the TV awake** inside Noor turns that off.
+Noor can be the TV's **screensaver**. When the TV has been idle for the time set in the TV's own
+settings, Noor's home comes up by itself over whatever was on: the clock, the prayer times, the
+photo. **OK** then opens Noor itself; any other button goes back to what was on before.
+
+In the emulator this worked as described. It has not been tried on a real TV, and TV makers
+differ in whether they let you choose a screensaver.
+
+**On the TV (Person).** In Noor: **Settings, Screen, Open Noor by itself when the TV is idle**. It
+opens the TV's screensaver settings; choose **Noor** in the list there. On older Android TV the
+same list is at Settings, Device Preferences, Screen saver. Many Google TV sets show no list (only
+"Ambient mode"); then use the computer route.
+
+**From a computer (You), with debugging on as in Way A:**
+
+```sh
+adb shell settings get secure screensaver_components      # note the answer: it is what to put back
+adb shell settings put secure screensaver_components io.github.devmohammadsalameh.noor/.NoorDream
+adb shell settings put secure screensaver_enabled 1
+```
+
+How long the TV waits is its own setting (Settings, System, Ambient mode or Screen saver, "When
+to start"). To put the TV's own screensaver back, give the first command's answer to the second,
+or run `adb shell settings delete secure screensaver_components`.
+
+**When Noor is already the app on screen** it stays: Noor asks the TV not to start a screensaver
+over it (**Settings, Screen, Keep Noor on screen**, on by default). An Android TV also wakes up
+where it was left, so a TV switched off on Noor comes back on Noor.
 
 ## The remote
 

@@ -27,6 +27,68 @@
     else if (HOST) host(function (h) { h.exit(); });
     else if (IS_WEBOS) safe(function () { if (window.PalmSystem && PalmSystem.platformBack) PalmSystem.platformBack(); else window.close(); });
   }
+  // On Android, Noor can also be the TV's screensaver (android/, NoorDream): the same page with
+  // ?dream=1, showing the home with nothing to press.
+  var DREAM = !!HOST && /[?&]dream=1/.test(location.search || '');
+
+  /* Keeping the TV on Noor when nobody touches the remote (Settings, Screen, Keep the TV awake).
+     Each TV has its own way of being asked not to start its screensaver over an app:
+       Android  the app's window flag (NoorHost.keepAwake)
+       Samsung  webapis.appcommon.setScreenSaver, from Samsung's own script
+       LG       the TV asks every app whether its screensaver may start; Noor answers no
+                (untested: no LG has run Noor yet) */
+  var webapisState = 0, webapisWaiting = [], lgSaver = null;
+  function withWebapis(fn) {   // Samsung's webapis.js, loaded once, only on a Samsung
+    if (!IS_TIZEN) return;
+    if (window.webapis) { fn(); return; }
+    webapisWaiting.push(fn);
+    if (webapisState) return;
+    webapisState = 1;
+    var sc = document.createElement('script');
+    sc.src = '$WEBAPIS/webapis/webapis.js';
+    sc.onload = function () { var w = webapisWaiting; webapisWaiting = []; w.forEach(function (f) { safe(f); }); };
+    document.head.appendChild(sc);
+  }
+  function applyAwake() {
+    var on = !!S.keepAwake;
+    host(function (h) { h.keepAwake(on); });
+    withWebapis(function () {
+      var A = window.webapis && webapis.appcommon;
+      if (A && A.setScreenSaver) A.setScreenSaver(on ? A.AppCommonScreenSaverState.SCREEN_SAVER_OFF : A.AppCommonScreenSaverState.SCREEN_SAVER_ON, function () {}, function () {});
+    });
+    if (IS_WEBOS && !lgSaver && typeof window.PalmServiceBridge !== 'undefined') safe(function () {
+      lgSaver = new PalmServiceBridge();
+      lgSaver.onservicecallback = function (msg) {
+        var r = safe(function () { return JSON.parse(msg); }, null);
+        if (!r || r.state !== 'Active' || r.timestamp == null || !S.keepAwake) return;
+        var b = new PalmServiceBridge();
+        b.call('luna://com.webos.service.tvpower/power/responseScreenSaverRequest', JSON.stringify({ clientName: 'noor', ack: false, timestamp: r.timestamp }));
+      };
+      lgSaver.call('luna://com.webos.service.tvpower/power/registerScreenSaverRequest', JSON.stringify({ subscribe: true, clientName: 'noor' }));
+    });
+  }
+
+  /* Samsung only: bringing Noor to the front at prayer time (Settings, Prayer). Samsung's alarm
+     feature opens an app at a set time, even with another app on screen. The alarms for the next
+     three days are set again each time Noor runs, so they follow the city and the fine-tuning. */
+  var frontTest = 0;   // when the one-minute test alarm is due, so setting the others does not wipe it
+  function canFront() { return !!(IS_TIZEN && window.tizen && tizen.alarm && tizen.AlarmAbsolute); }
+  function setFrontAlarms() {
+    if (!canFront()) return;
+    safe(function () { tizen.alarm.removeAll(); });
+    if (frontTest > Date.now() + 2000) safe(function () { tizen.alarm.add(new tizen.AlarmAbsolute(new Date(frontTest)), SELF_ID); });
+    if (!S.frontAtPrayer) return;
+    var now = NOW(), n = 0;
+    for (var d = 0; d < 3; d++) {
+      var t = prayerTimes(new Date(now.getFullYear(), now.getMonth(), now.getDate() + d));
+      C.prayers.forEach(function (p) {
+        if (p.notPrayer || t[p.key] <= now) return;
+        safe(function () { tizen.alarm.add(new tizen.AlarmAbsolute(t[p.key]), SELF_ID); n++; });
+      });
+    }
+    return n;
+  }
+
   var SELF_ID = IS_TIZEN ? safe(function () { return tizen.application.getCurrentApplication().appInfo.id; }) : 'noor';
 
   function $(id) { return document.getElementById(id); }
@@ -114,7 +176,7 @@
   /* ---------------- settings ---------------- */
   var DEFAULTS = { loc: null, method: 'auto', hour12: true, hijriAdjust: 0, asrFactor: 1, alerts: true, preAlert: 0, adj: null, pinned: [],
     bgMode: 'time', bgSel: [], bgDur: 60, bgMotion: true, lang: 'ar', tiles: 'auto', greet: false, reciter: 'alafasy',
-    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false, keepAwake: true,
+    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false, keepAwake: true, frontAtPrayer: false,
     afterSurah: 'next', q: null, qFav: [] };
   var PRESETS = {
     classic:  { clockVis: 'always', clockStyle: 'large',  prVis: 'always', prStyle: 'arch',  cardVis: 'always', cardStyle: 'glass',   weatherVis: 'always', dhikrVis: 'always' },
@@ -209,7 +271,9 @@
   function computeDay(now) {
     times = prayerTimes(now);
     tomorrowFajr = prayerTimes(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)).fajr;
+    var newDay = today !== null && today !== now.toDateString();
     today = now.toDateString();
+    if (newDay) setFrontAlarms();
 
     // dates
     $('dayAr').innerHTML = C.weekdaysAr[now.getDay()];
@@ -668,6 +732,18 @@
         value: onOff(S.alerts), step: function () { S.alerts = !S.alerts; touched('time'); } },
       { kind: 'cycle', key: 'preAlert', label: ['تنبيه قبل الصلاة', 'Reminder before the prayer'], value: mins(S.preAlert),
         step: function (d) { S.preAlert = cyc(PRE_MIN, S.preAlert, d); touched('time'); } },
+    ].concat(canFront() ? [
+      { kind: 'cycle', key: 'front', label: ['فتح نور عند دخول الوقت', 'Bring Noor to the front at prayer time'],
+        sub: ['حتى لو كان تطبيق آخر على الشاشة. خاص بتلفاز سامسونج', 'Even when another app is on screen. Samsung TVs only'],
+        value: onOff(S.frontAtPrayer), step: function () { S.frontAtPrayer = !S.frontAtPrayer; touched('time'); setFrontAlarms(); } },
+      { kind: 'action', key: 'front-test', label: ['تجربة: افتح نور بعد دقيقة', 'Test it: bring Noor to the front in one minute'],
+        sub: ['اضغط OK ثم افتح تطبيقًا آخر وانتظر', 'Press OK, then open another app and wait'],
+        act: function () {
+          frontTest = Date.now() + 60000;
+          var ok = safe(function () { tizen.alarm.add(new tizen.AlarmAbsolute(new Date(frontTest)), SELF_ID); return true; }, false);
+          SET.msg = ok ? tr('تم. افتح تطبيقًا آخر الآن وانتظر دقيقة.', 'Set. Open another app now and wait one minute.') : tr('هذا التلفاز رفض المنبّه.', 'This TV refused the alarm.');
+        } }
+    ] : [], [
       head(['الحساب', 'Calculation']),
       { kind: 'cycle', key: 'asr', label: ['حساب العصر', 'Asr method'], value: S.asrFactor === 1 ? ['الجمهور', 'Standard'] : ['الحنفي', 'Hanafi'],
         step: function () { S.asrFactor = S.asrFactor === 1 ? 2 : 1; touched('time'); } },
@@ -675,7 +751,7 @@
         value: (function () { var v = (S.hijriAdjust > 0 ? '+' : '') + S.hijriAdjust; return [arDigits(v) + ' يوم', v + ' day']; })(),
         step: function (d) { S.hijriAdjust = Math.max(-2, Math.min(2, S.hijriAdjust + d)); touched('time'); } },
       head(['ضبط المواقيت بالدقائق (لتوافق مسجدك)', 'Fine-tune, in minutes (to match your mosque)'])
-    ];
+    ]);
     var t = prayerTimes(NOW()), any = false;
     C.prayers.forEach(function (p) {
       var a = S.adj[p.key] || 0, v = (a > 0 ? '+' : '') + a;
@@ -751,11 +827,15 @@
         value: mins(S.idleMin), step: function (d) { S.idleMin = cyc(IDLE_MIN, S.idleMin, d); touched('screen'); } },
       { kind: 'cycle', key: 'idleAct', label: ['ماذا يحدث', 'What happens'], value: optText(IDLE_ACT, S.idleAct),
         step: function (d) { S.idleAct = cyc(IDLE_ACT.map(function (n) { return n[0]; }), S.idleAct, d); touched('screen'); } },
-    ].concat(HOST ? [
+    ].concat(IS_TV ? [
       head(['التلفاز', 'The TV']),
-      { kind: 'cycle', key: 'keepAwake', label: ['إبقاء التلفاز مستيقظًا', 'Keep the TV awake'], sub: ['لا تبدأ شاشة التوقف ما دامت نور ظاهرة', 'The screensaver does not start while Noor is showing'],
-        value: onOff(S.keepAwake), step: function () { S.keepAwake = !S.keepAwake; touched('screen'); host(function (h) { h.keepAwake(S.keepAwake); }); } }
-    ] : [], [
+      { kind: 'cycle', key: 'keepAwake', label: ['إبقاء نور على الشاشة', 'Keep Noor on screen'], sub: ['لا تستبدلها شاشة التوقف الخاصة بالتلفاز ما دامت نور ظاهرة', 'The TV\'s own screensaver does not replace Noor while it is showing'],
+        value: onOff(S.keepAwake), step: function () { S.keepAwake = !S.keepAwake; touched('screen'); applyAwake(); } }
+    ].concat(HOST ? [
+      { kind: 'nav', key: 'dream', label: ['فتح نور تلقائيًا عند ترك التلفاز', 'Open Noor by itself when the TV is idle'],
+        sub: ['يفتح إعدادات شاشة التوقف في التلفاز: اختر «نور»', 'Opens the TV\'s screensaver settings: choose Noor there'],
+        act: function () { var ok = false; host(function (h) { ok = !!h.dreamSettings(); }); if (!ok) SET.msg = tr('هذا التلفاز لا يعرض هذا الإعداد. راجع دليل التثبيت.', 'This TV does not offer that setting. See the install guide.'); } }
+    ] : []) : [], [
       head(['حماية الشاشة', 'Screen care']),
       { kind: 'cycle', key: 'shift', label: ['إزاحة خفيفة للعناصر', 'Gentle shift'], sub: ['تتحرك العناصر بضعة بكسلات كل ثلاث دقائق', 'Everything moves a few pixels every three minutes'],
         value: onOff(S.shift), step: function () { S.shift = !S.shift; touched('screen'); shiftUi(); } }
@@ -905,7 +985,7 @@
     today = null; nx = null; tick();
     if (d.loc) loadWeather();
     if (d.bg || d.look) nextBackground(d.bg ? null : (bgCur && bgCur.id));
-    checkNight(true); armIdle();
+    checkNight(true); armIdle(); setFrontAlarms();
     buildTiles(); applyBody(); renderActions();
   }
 
@@ -1500,6 +1580,7 @@
     if (awake) c.push('awake');
     if (awake) c.push('tiles-shown');
     if (track) c.push('has-audio');
+    if (DREAM) c.push('dream');
     // quiet: after Isha (night mode) or after a while with no button pressed (idle)
     var dim = (isNight && (S.night === 'dim' || S.night === 'both')) || (idle && (S.idleAct === 'dim' || S.idleAct === 'both'));
     var amb = (isNight && (S.night === 'ambient' || S.night === 'both')) || (idle && (S.idleAct === 'clock' || S.idleAct === 'both'));
@@ -1554,6 +1635,7 @@
   }
   function onKey(e) {
     var k = e.keyCode;
+    if (DREAM) return;
     armIdle();
     if (mode === 'settings' && typingKey(e)) return;
     if (k === K.BACK || k === K.ESC || k === K.BKSP || k === K.LGBACK) {   // 10009 Samsung, 461 LG, 27 the Android app and a keyboard
@@ -1648,10 +1730,12 @@
   $('gear').onclick = function () { hIdx = 1; openSettings(); };
   wireSettingsPointer();
   armIdle();
-  host(function (h) { h.keepAwake(S.keepAwake); });
+  applyAwake();
+  setFrontAlarms();
   setTimeout(loadWeather, 1500);
   setInterval(loadWeather, 30 * 60000);
-  if (!S.setup) startWizard();
+  if (DREAM) { /* the screensaver: the home as it is, nothing to press */ }
+  else if (!S.setup) startWizard();
   else if (PREVIEW.open === 'quran') openQuran();
   else if (PREVIEW.open) { openSettings(); SECS.forEach(function (sc, i) { if (sc[0] === PREVIEW.open) SET.sec = i; }); paintSettings(true); }
 })();
