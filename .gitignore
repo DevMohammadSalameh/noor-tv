@@ -6,6 +6,12 @@ build/
 # Samsung certificate when they install it (README, "Install it on your TV").
 dist/
 *.wgt
+*.apk
+*.ipk
+
+# Signing keys never belong in the repository
+*.jks
+*.keystore
 
 # Your own photos and their list stay yours (README, "Your own photos")
 img/bg/mine/

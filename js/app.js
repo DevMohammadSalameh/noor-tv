@@ -6,11 +6,27 @@
  */
 (function () {
   'use strict';
-  var VERSION = '1.8.0';
+  var VERSION = '1.9.0';
   var C = window.NOOR_CONTENT;
   var CT = window.NOOR_CITIES || { countries: {}, cities: [] };
   var QS = (window.NOOR_QURAN && window.NOOR_QURAN.surahs) || [];
+  // Which TV this is. Samsung gives the page `tizen`; the Android app (android/) gives it
+  // `NoorHost` and sends the remote's keys through window.NoorKey; an LG has PalmSystem.
   var IS_TIZEN = typeof window.tizen !== 'undefined' && window.tizen.application;
+  var HOST = !IS_TIZEN && window.NoorHost ? window.NoorHost : null;
+  var IS_WEBOS = !IS_TIZEN && !HOST && (typeof window.PalmSystem !== 'undefined' || /Web0S|webOS/i.test(navigator.userAgent || ''));
+  var IS_TV = !!(IS_TIZEN || HOST || IS_WEBOS);
+  function host(fn) { if (HOST) safe(function () { fn(HOST); }); }
+  // In the Android app the page is as wide as the screen in Android's own units (960 on a 1080p
+  // TV) and fit() scales the 1920x1080 stage into it. Laid out 1920 wide instead, Android zooms
+  // into the text box whenever the keyboard opens.
+  if (HOST) safe(function () { document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'); });
+  // Back on the home: hand the screen back to the TV's own home
+  function leaveApp() {
+    if (IS_TIZEN) safe(function () { tizen.application.getCurrentApplication().hide(); });
+    else if (HOST) host(function (h) { h.exit(); });
+    else if (IS_WEBOS) safe(function () { if (window.PalmSystem && PalmSystem.platformBack) PalmSystem.platformBack(); else window.close(); });
+  }
   var SELF_ID = IS_TIZEN ? safe(function () { return tizen.application.getCurrentApplication().appInfo.id; }) : 'noor';
 
   function $(id) { return document.getElementById(id); }
@@ -22,7 +38,7 @@
   //                          ?open=quran the Quran player
   var NOW_OFFSET = 0, FRESH = false, PREVIEW = {};
   (function () {
-    if (IS_TIZEN) return;
+    if (IS_TV) return;
     var q = location.search || '', m = /[?&]now=([^&]+)/.exec(q);
     if (m) { var t = new Date(decodeURIComponent(m[1])); if (!isNaN(t)) NOW_OFFSET = t - new Date(); }
     ['look', 'bg', 'lang', 'glass', 'clear', 'open'].forEach(function (k) { var v = new RegExp('[?&]' + k + '=([^&]+)').exec(q); if (v) PREVIEW[k] = decodeURIComponent(v[1]); });
@@ -98,7 +114,7 @@
   /* ---------------- settings ---------------- */
   var DEFAULTS = { loc: null, method: 'auto', hour12: true, hijriAdjust: 0, asrFactor: 1, alerts: true, preAlert: 0, adj: null, pinned: [],
     bgMode: 'time', bgSel: [], bgDur: 60, bgMotion: true, lang: 'ar', tiles: 'auto', greet: false, reciter: 'alafasy',
-    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false,
+    preset: 'classic', w: null, night: 'off', shift: true, glass: 'frosted', glassAmt: 3, idleMin: 0, idleAct: 'dim', setup: false, keepAwake: true,
     afterSurah: 'next', q: null, qFav: [] };
   var PRESETS = {
     classic:  { clockVis: 'always', clockStyle: 'large',  prVis: 'always', prStyle: 'arch',  cardVis: 'always', cardStyle: 'glass',   weatherVis: 'always', dhikrVis: 'always' },
@@ -142,6 +158,8 @@
     var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
     var st = $('stage').style;
     st.transform = st.webkitTransform = 'scale(' + s + ')';
+    // one line for whoever is reading the TV's log (adb logcat, a web inspector)
+    if (IS_TV && window.console) console.log('Noor ' + VERSION + ': window ' + window.innerWidth + 'x' + window.innerHeight + ', scale ' + s.toFixed(3) + ', ratio ' + (window.devicePixelRatio || 1));
   }
   window.addEventListener('resize', fit);
 
@@ -733,10 +751,15 @@
         value: mins(S.idleMin), step: function (d) { S.idleMin = cyc(IDLE_MIN, S.idleMin, d); touched('screen'); } },
       { kind: 'cycle', key: 'idleAct', label: ['ماذا يحدث', 'What happens'], value: optText(IDLE_ACT, S.idleAct),
         step: function (d) { S.idleAct = cyc(IDLE_ACT.map(function (n) { return n[0]; }), S.idleAct, d); touched('screen'); } },
+    ].concat(HOST ? [
+      head(['التلفاز', 'The TV']),
+      { kind: 'cycle', key: 'keepAwake', label: ['إبقاء التلفاز مستيقظًا', 'Keep the TV awake'], sub: ['لا تبدأ شاشة التوقف ما دامت نور ظاهرة', 'The screensaver does not start while Noor is showing'],
+        value: onOff(S.keepAwake), step: function () { S.keepAwake = !S.keepAwake; touched('screen'); host(function (h) { h.keepAwake(S.keepAwake); }); } }
+    ] : [], [
       head(['حماية الشاشة', 'Screen care']),
       { kind: 'cycle', key: 'shift', label: ['إزاحة خفيفة للعناصر', 'Gentle shift'], sub: ['تتحرك العناصر بضعة بكسلات كل ثلاث دقائق', 'Everything moves a few pixels every three minutes'],
         value: onOff(S.shift), step: function () { S.shift = !S.shift; touched('screen'); shiftUi(); } }
-    ];
+    ]);
   }
 
   function aboutRows() {
@@ -895,11 +918,13 @@
     $('setType').className = 'set-type on';
     paintSettings(false);
     safe(function () { inp.focus(); });
+    host(function (h) { h.typing(true); });   // the Android app shows the TV's keyboard and lets its keys through
   }
   function stopTyping() {
     SET.typing = null;
     $('setType').className = 'set-type';
     safe(function () { $('setInput').blur(); });
+    host(function (h) { h.typing(false); });
   }
   // true: the key belonged to the text box
   function typingKey(e) {
@@ -913,7 +938,7 @@
       if (mode === 'settings') paintSettings(true);
       return true;
     }
-    if (k === K.BACK || k === K.ESC || k === 65385) { e.preventDefault(); stopTyping(); paintSettings(true); return true; }   // 65385: Cancel on Samsung's keyboard
+    if (k === K.BACK || k === K.ESC || k === K.LGBACK || k === 65385) { e.preventDefault(); stopTyping(); paintSettings(true); return true; }   // 65385: Cancel on Samsung's keyboard
     if (k === K.UP || k === K.DOWN) { e.preventDefault(); stopTyping(); paintSettings(true); return true; }
     return true;   // everything else is typing (Backspace deletes here, it does not go back)
   }
@@ -1287,9 +1312,9 @@
   })();
 
   /* ---------------- the Quran player screen: every surah, favourites, what is playing ---------------- */
-  var qIdx = 0, qNodes = [], qItems = [], qList = 'all', QCOLS = 6;
+  var qIdx = 0, qNodes = [], qItems = [], qList = 'all', QCOLS = 6, qZone = 'grid', qOpt = 0;
   function openQuran() {
-    mode = 'quran';
+    mode = 'quran'; qZone = 'grid';
     if (qList === 'fav' && !S.qFav.length) qList = 'all';
     buildQuran((track && track.n) || (S.q && S.q.n) || 1);
     $('quranOverlay').className = 'overlay open';
@@ -1310,12 +1335,23 @@
   function paintQuran() {
     qNodes.forEach(function (nd, i) {
       var n = qItems[i];
-      setCls(nd, 'qtile' + (i === qIdx ? ' focus' : '') + (track && track.n === n ? (isPlaying() ? ' playing' : ' paused') : '') + (S.qFav.indexOf(n) !== -1 ? ' fav' : ''));
+      setCls(nd, 'qtile' + (i === qIdx ? (qZone === 'grid' ? ' focus' : ' here') : '') + (track && track.n === n ? (isPlaying() ? ' playing' : ' paused') : '') + (S.qFav.indexOf(n) !== -1 ? ' fav' : ''));
     });
     var row = Math.floor(qIdx / QCOLS), sc = $('qGrid').firstChild;
     var y = Math.max(0, row - 2) * 124;
     if (sc) sc.style.transform = sc.style.webkitTransform = 'translateY(' + (-y) + 'px)';
-    $('qCount').innerHTML = qList === 'fav' ? T('المفضلة · ' + arDigits(qItems.length), 'Favourites · ' + qItems.length) : T('كل السور · ' + arDigits(S.qFav.length) + ' مفضلة', 'All surahs · ' + S.qFav.length + ' favourites');
+    // The options along the top do what the colour buttons do, for remotes that have none:
+    // Up from the first row reaches them.
+    var cur = surah(qItems[qIdx] || 1), isFav = S.qFav.indexOf(cur[0]) !== -1, R = reciter(), after = optText(AFTER, S.afterSurah);
+    var opts = [
+      ['yel', (isFav ? '★ ' : '☆ ') + T(esc(cur[1]), esc(cur[2]))],
+      ['grn', qList === 'fav' ? T('المفضلة · ' + arDigits(qItems.length), 'Favourites · ' + qItems.length) : T('كل السور · ' + arDigits(S.qFav.length) + ' مفضلة', 'All surahs · ' + S.qFav.length + ' favourites')],
+      ['red', T(esc(R.ar), esc(R.en))],
+      ['blu', T('بعدها: ' + after[0], 'Then: ' + after[1])]
+    ];
+    $('qCount').innerHTML = opts.map(function (o, i) {
+      return '<span class="qopt' + (qZone === 'opts' && i === qOpt ? ' focus' : '') + '" data-i="' + i + '"><b class="' + o[0] + '">●</b>' + o[1] + '</span>';
+    }).join('');
     paintQBar();
   }
   function paintQBar() {
@@ -1341,27 +1377,39 @@
     else playSurah(n, S.q && S.q.n === n ? S.q.t : 0, qList);
     paintQuran();
   }
+  // what the four options (and the four colour buttons) do
+  function quranOpt(i) {
+    var n = qItems.length, cur = qItems[qIdx];
+    if (i === 0) {          // yellow: favourite
+      toggleFav(cur);
+      if (qList === 'fav') { var keep = qItems[Math.min(qIdx + 1, n - 1)]; if (!S.qFav.length) qList = 'all'; buildQuran(keep === cur ? qItems[qIdx - 1] : keep); }
+    } else if (i === 1) {   // green: favourites only, or all
+      if (qList === 'all' && !S.qFav.length) { toast(T('لا مفضلة بعد. اختر سورة ثم ☆', 'No favourites yet. Pick a surah, then ☆')); return; }
+      qList = qList === 'all' ? 'fav' : 'all'; buildQuran(cur);
+    } else if (i === 2) {   // red: the next reciter
+      var x = 0; C.reciters.forEach(function (r, j) { if (r.id === S.reciter) x = j; });
+      S.reciter = C.reciters[(x + 1) % C.reciters.length].id; saveSettings();
+      if (track && track.n) playTrack({ n: track.n, list: track.list, auto: true }, 0);
+    } else {                // blue: what happens after a surah
+      S.afterSurah = cyc(AFTER.map(function (a) { return a[0]; }), S.afterSurah, 1); saveSettings();
+    }
+  }
   function quranKey(k) {
     var n = qItems.length, fwd = S.lang === 'ar' ? K.LEFT : K.RIGHT;   // in Arabic the grid runs right to left
-    if (k === K.LEFT || k === K.RIGHT) qIdx = Math.max(0, Math.min(n - 1, qIdx + (k === fwd ? 1 : -1)));
-    else if (k === K.UP) qIdx = Math.max(0, qIdx - QCOLS);
+    if (k === K.YELLOW || k === K.Y) quranOpt(0);
+    else if (k === K.GREEN || k === K.G) quranOpt(1);
+    else if (k === K.RED || k === K.R) quranOpt(2);
+    else if (k === K.BLUE || k === K.B) quranOpt(3);
+    else if (qZone === 'opts') {
+      if (k === K.LEFT || k === K.RIGHT) qOpt = Math.max(0, Math.min(3, qOpt + (k === fwd ? 1 : -1)));
+      else if (k === K.DOWN) qZone = 'grid';
+      else if (k === K.ENTER) quranOpt(qOpt);
+      else return;
+    }
+    else if (k === K.LEFT || k === K.RIGHT) qIdx = Math.max(0, Math.min(n - 1, qIdx + (k === fwd ? 1 : -1)));
+    else if (k === K.UP) { if (qIdx < QCOLS) qZone = 'opts'; else qIdx -= QCOLS; }
     else if (k === K.DOWN) qIdx = Math.min(n - 1, qIdx + QCOLS);
     else if (k === K.ENTER) return quranOk();
-    else if (k === K.YELLOW || k === K.Y) {
-      toggleFav(qItems[qIdx]);
-      if (qList === 'fav') { var keep = qItems[Math.min(qIdx + 1, n - 1)]; if (!S.qFav.length) qList = 'all'; buildQuran(keep); }
-    }
-    else if (k === K.GREEN || k === K.G) {
-      if (qList === 'all' && !S.qFav.length) { toast(T('لا مفضلة بعد. الزر الأصفر يضيف سورة', 'No favourites yet. The yellow button adds a surah')); return; }
-      var cur = qItems[qIdx]; qList = qList === 'all' ? 'fav' : 'all'; buildQuran(cur);
-    }
-    else if (k === K.RED || k === K.R) {
-      var i = 0; C.reciters.forEach(function (r, x) { if (r.id === S.reciter) i = x; });
-      S.reciter = C.reciters[(i + 1) % C.reciters.length].id; saveSettings();
-      toast(T('القارئ: ' + reciter().ar, 'Reciter: ' + reciter().en));
-      if (track && track.n) playTrack({ n: track.n, list: track.list, auto: true }, 0);
-    }
-    else if (k === K.BLUE || k === K.B) { S.afterSurah = cyc(AFTER.map(function (a) { return a[0]; }), S.afterSurah, 1); saveSettings(); }
     else return;
     paintQuran();
   }
@@ -1499,20 +1547,20 @@
   /* ---------------- remote keys ---------------- */
   var K = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13, BACK: 10009, ESC: 27, BKSP: 8, YELLOW: 405, Y: 89, GREEN: 404, G: 71, PLAYPAUSE: 10252, PLAY: 415, PAUSE: 19, STOP: 413,
     PGUP: 33, PGDN: 34, CHUP: 427, CHDN: 428,
-    RED: 403, R: 82, BLUE: 406, B: 66, NEXT: 10233, PREV: 10232, FF: 417, RW: 412, N: 78, P: 80, DOT: 190, COMMA: 188 };
+    LGBACK: 461, RED: 403, R: 82, BLUE: 406, B: 66, NEXT: 10233, PREV: 10232, FF: 417, RW: 412, N: 78, P: 80, DOT: 190, COMMA: 188 };
   if (IS_TIZEN && tizen.tvinputdevice) {
     ['ColorF0Red', 'ColorF1Green', 'ColorF2Yellow', 'ColorF3Blue', 'MediaPlayPause', 'MediaPlay', 'MediaPause', 'MediaStop',
       'MediaTrackNext', 'MediaTrackPrevious', 'MediaFastForward', 'MediaRewind'].forEach(function (k) { safe(function () { tizen.tvinputdevice.registerKey(k); }); });
   }
-  document.addEventListener('keydown', function (e) {
+  function onKey(e) {
     var k = e.keyCode;
     armIdle();
     if (mode === 'settings' && typingKey(e)) return;
-    if (k === K.BACK || k === K.ESC || k === K.BKSP) {
+    if (k === K.BACK || k === K.ESC || k === K.BKSP || k === K.LGBACK) {   // 10009 Samsung, 461 LG, 27 the Android app and a keyboard
       e.preventDefault();
       if (mode !== 'home') closeOverlays();
       else if (zone === 'card') { zone = 'gear'; paintFocus(); renderActions(); }
-      else if (IS_TIZEN) safe(function () { tizen.application.getCurrentApplication().hide(); });
+      else leaveApp();
       return;
     }
     // the remote's media keys work everywhere: on the home, in the player, in Settings
@@ -1569,12 +1617,15 @@
       else if (k === K.GREEN || k === K.G) return allBgs();
       paintGallery();
     }
-  });
+  }
+  document.addEventListener('keydown', onKey);
+  // The Android app turns every remote button into the key numbers used here and hands them over
+  window.NoorKey = function (code) { onKey({ keyCode: +code, preventDefault: function () {} }); };
 
   // Back from another app, or the TV woke with Noor still open: the day, the times and the
   // countdown are worked out again straight away.
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { remember(); return; }
+    if (document.hidden) { remember(); if (HOST && isPlaying()) { player.pause(); } return; }   // Android: no recitation behind another app
     today = null; nx = null; tick(); checkNight(true); armIdle();
   });
 
@@ -1593,9 +1644,11 @@
   buildTiles();
   renderActions();
   $('quranBtn').onclick = function () { hIdx = 0; openQuran(); };
+  $('qCount').onclick = function (e) { for (var t = e.target; t && t !== this; t = t.parentNode) if (t.getAttribute && t.getAttribute('data-i') != null) { quranOpt(+t.getAttribute('data-i')); paintQuran(); return; } };
   $('gear').onclick = function () { hIdx = 1; openSettings(); };
   wireSettingsPointer();
   armIdle();
+  host(function (h) { h.keepAwake(S.keepAwake); });
   setTimeout(loadWeather, 1500);
   setInterval(loadWeather, 30 * 60000);
   if (!S.setup) startWizard();

@@ -1,0 +1,13 @@
+{
+  "id": "io.github.devmohammadsalameh.noor",
+  "version": "0.0.0",
+  "vendor": "Noor",
+  "type": "web",
+  "main": "index.html",
+  "title": "Noor",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "bgColor": "#04110f",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true
+}

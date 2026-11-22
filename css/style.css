@@ -628,3 +628,15 @@ body:not(.awake).vis-clock-press .bg.sc .gclock { opacity: 0; }
 .ov-hint .red { color: #ff6b5e; } .ov-hint .blu { color: #5aa8ff; }
 /* with the prayer strip along the bottom the card sits in the middle, so the bar goes up under the weather */
 .pr-strip .now-bar, .tiles-shown.pr-strip .now-bar { top: 150px; bottom: auto; max-width: 420px; }
+/* the player's options along the top (what the colour buttons do, for remotes without them) */
+#quranOverlay .ov-count { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; font-size: 22px; }
+.qopt { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; height: 50px; padding: 0 20px; margin-left: 12px; border-radius: 25px; white-space: nowrap;
+  color: #e9e1cf; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.08);
+  -webkit-transition: -webkit-transform 0.12s ease-out; transition: transform 0.12s ease-out; }
+.lang-ar .qopt { margin: 0 12px 0 0; font-family: 'NoorNaskh', serif; font-size: 25px; }
+.qopt b { font-size: 15px; margin-right: 10px; } .lang-ar .qopt b { margin: 0 0 0 10px; }
+.qopt .yel { color: #f4cf3a; } .qopt .grn { color: #3ad07a; } .qopt .red { color: #ff6b5e; } .qopt .blu { color: #5aa8ff; }
+.qopt.focus { background: var(--hi); color: #1d1608; border-color: #fff4d6; -webkit-transform: scale(1.06); transform: scale(1.06); }
+.qtile.here { border-color: var(--hi); }
+#quranOverlay .qopt .ar, #quranOverlay .qopt .t-en { font-size: inherit; color: inherit; margin: 0; letter-spacing: 0; }
+.lang-ar #quranOverlay .ov-count { -webkit-flex-direction: row-reverse; flex-direction: row-reverse; }

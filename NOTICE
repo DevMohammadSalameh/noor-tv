@@ -4,7 +4,8 @@ Copyright (c) 2026 Mohammad Salameh. MIT licence: see LICENSE.
 Parts of Noor come from couch-tv (https://github.com/Seagey/couch-tv), used under
 the MIT licence: the clock-behind-the-scenery look (the glass clock, the cut-out
 drawn over it and the frosted fill, in js/app.js and css/style.css), the shape of
-the settings screen, scripts/make-scene.py, and the five scene pictures with
+the settings screen, scripts/make-scene.py, the LG package writer in
+scripts/build-webos.py, and the five scene pictures with
 their cut-outs and glass copies in img/bg/scene-*.
 
     Copyright (c) 2026 Seagey

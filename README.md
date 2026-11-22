@@ -1,6 +1,6 @@
 # Noor · نور
 
-An Islamic home dashboard for Samsung TVs: prayer times, the Hijri date, a verse of the day,
+An Islamic home dashboard for your TV (Samsung, Android TV, Google TV, Fire TV and LG): prayer times, the Hijri date, a verse of the day,
 occasions (Friday, Ramadan, the Eids, Arafah), adhkar and the weather, over full-screen photos.
 Arabic and English. It runs on the TV by itself: once it is installed there is no computer, no
 server and no account behind it.
@@ -27,79 +27,52 @@ server and no account behind it.
   **Scenery clock**, a big glass clock that sits *behind* the mountains of the photo.
 - **Photos that follow the day**: dawn photos at dawn, night photos at night. Add your own.
 - **Night mode** after Isha and **idle dimming** after a while with no button pressed.
-- Everything is driven by the TV remote: arrows, OK, Back and the colour keys.
+- Everything is driven by the TV remote: arrows, OK and Back. Coloured buttons are shortcuts
+  where a remote has them.
 
-## What you need
+## Put it on your TV
 
-- A Samsung smart TV (Tizen). Noor is written to run on 2017 and newer models, but so far it has
-  **only been run on one TV**, a 2025 Crystal UHD (U8000F, Tizen 9.0). If you try another, an issue
-  saying how it went is welcome.
-- A computer **once**, to put the app on the TV (Mac, Windows or Linux). After that the TV needs
-  nothing else.
-- A Samsung account, the one you may already use on the TV. You sign in once on the computer so
-  the app can be signed for *your* TV.
+### The easy way: ask an AI coding agent
 
-Noor is not in Samsung's app store. You install it yourself in the TV's Developer Mode, which
-Samsung provides for exactly this.
+If you use an AI coding agent (Claude Code, Codex, Cursor and the like), give it this page's
+address and say what TV you have:
 
-## Install it on your TV
+> Put Noor on my TV: https://github.com/DevMohammadSalameh/noor-tv
 
-### 1. Developer Mode on the TV
+The repository carries instructions written for the agent ([AGENTS.md](AGENTS.md)). It does the
+computer work, tells you which buttons to press on the remote, and waits while you sign in to
+your own accounts. You need no technical knowledge.
 
-1. On the TV open **Apps**.
-2. Press **1 2 3 4 5** on the remote. With the small remote, use the on-screen number pad. On
-   2022 and newer TVs, if nothing happens, scroll to the bottom of the Apps screen and open **App
-   Settings**: the code box opens from there.
-3. Switch **Developer mode** to **On** and type the **IP address of your computer** (on a Mac:
-   System Settings, Wi-Fi, Details). Type each group as it is, with no leading zeros.
-4. **Restart the TV**: hold the power button until the Samsung logo appears. A short press only
-   sends it to standby.
+### Which TV?
 
-### 2. Get the package
+| Your TV | What it takes | Guide | Tried on |
+|---|---|---|---|
+| **Samsung** (2017 or newer) | A computer on the same Wi-Fi, once. The TV's Developer Mode. Your Samsung account. | [docs/SAMSUNG.md](docs/SAMSUNG.md) | A real 2025 Samsung |
+| **Android TV, Google TV, Fire TV** | Nothing but the TV: a free app called Downloader and one web address. Or a computer, if an agent is helping. | [docs/ANDROID-TV.md](docs/ANDROID-TV.md) | An emulator only, not a real TV yet |
+| **LG** | A computer once, LG's Developer Mode app, a free LG developer account. LG removes it unless you press Extend every few weeks. | [docs/LG.md](docs/LG.md) | Not tried on any LG yet |
+| Roku, Apple TV, Vizio and others | Not supported. A Google TV or Fire TV stick in a spare HDMI port makes any TV an Android one. | | |
 
-Download `Noor-<version>.wgt` from this repository's **Releases** page, or build it yourself:
+Noor is not in any TV's app store, so each of these is the maker's own way of adding an app
+yourself. Every guide ends with how to take it off again.
 
-```sh
-sh scripts/build.sh
-```
+### The files
 
-That makes `dist/Noor-<version>.wgt`. It is a plain zip of this folder with nothing compiled.
+Each [release](https://github.com/DevMohammadSalameh/noor-tv/releases/latest) carries three, and
+these links always give the newest:
 
-**The package is unsigned, on purpose.** A Samsung TV only runs an app signed with a certificate
-made for that TV, so a package signed by someone else would not install on yours. The next step
-signs it with your own.
+- Samsung: [`Noor.wgt`](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.wgt).
+  It is unsigned on purpose: a Samsung TV only runs an app signed for that TV, so the install tool
+  signs it with your own certificate.
+- Android TV, Google TV, Fire TV: [`Noor.apk`](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.apk)
+- LG: [`Noor.ipk`](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.ipk)
 
-### 3. Install it with Apps2Samsung
+To build them yourself: `sh scripts/build.sh` (Samsung), `sh scripts/build-android.sh` (Android),
+`python3 scripts/build-webos.py` (LG). Each script's first lines say what it needs.
 
-[Apps2Samsung](https://github.com/Apps2Samsung/Apps2Samsung/releases) is a free tool that signs a
-`.wgt` with **your own** Samsung certificate and installs it. Samsung's Tizen Studio does the same
-job if you already have it.
+### Opening it when the TV is switched on
 
-With the desktop app: pick your TV, choose **Custom .wgt**, pick the Noor package, press Install.
-
-Or with its command line:
-
-```sh
-apps2samsung-cli tv <tv address>
-```
-
-It should say the TV is ready, Developer mode on, with your computer's address as the host. Then:
-
-```sh
-apps2samsung-cli install dist/Noor-1.8.0.wgt --tv <tv address>
-```
-
-The first time, a browser opens for the Samsung account sign-in. The tool turns that into a
-certificate for your TV and keeps it on your computer; later installs need no sign-in. Noor never
-sees your password.
-
-**Noor** then appears among the TV's apps. Move it to the front of the app row if you like.
-
-### 4. Open it when the TV is switched on
-
-On the TV: **Settings, General, Smart Features, Autorun Last App**, on. When Noor was the last
-app open, the TV starts on it. This is Samsung's own setting, so nothing has to stay running
-anywhere else.
+On a Samsung: **Settings, General, Smart Features, Autorun Last App**. An Android TV wakes up
+where it was left. Each guide has the details. Nothing has to stay running anywhere else.
 
 ## First run
 
@@ -117,7 +90,7 @@ it offers first comes from the TV's time zone. All of it can be changed later in
   that have them.
 - In the photo grid: **OK** switches a photo on or off, **yellow** keeps only that one, **green**
   switches them all on.
-- **Back** on the home returns to Samsung's own home.
+- **Back** on the home returns to the TV's own home.
 
 ## Listening to the Quran
 
@@ -131,6 +104,8 @@ Open the **Quran** button on the home, or **All surahs** on the card.
 - **Yellow** marks a favourite. **Green** shows only your favourites; played from there, "next"
   stays among them.
 - **Red** changes the reciter.
+- No coloured buttons on your remote? Press **▲** from the top row of surahs: the same four
+  options are along the top of the screen.
 - **Back** leaves the list and the recitation carries on. A small bar on the home shows the surah,
   the reciter and how far along it is.
 - The home card offers **Continue** where you stopped. On Friday it offers Al-Kahf, after Isha
@@ -199,11 +174,11 @@ Prayer times, the Hijri date and everything else work with the TV offline.
 
 ## Limits to know
 
-- The remote's Home button still opens Samsung's home. Noor is an app, not a replacement for it.
-- **Developer Mode can switch itself off** after a TV software update, and some updates remove
-  apps installed this way. Then turn it on again and repeat step 3.
-- The certificate Apps2Samsung makes is valid for a year. After that, install again and sign in
-  once more.
+- The remote's Home button still opens the TV's own home. Noor is an app, not a replacement for it.
+- It is installed outside the app stores, so it does not update itself: install the newer file
+  the same way.
+- Each TV maker has its own conditions (Samsung's Developer Mode can switch off after a software
+  update; LG removes the app unless Developer Mode is extended). The guides say what to expect.
 - With the scenery clock the photo stays still (no slow drift), so the cut-out stays lined up.
 
 ## Try it in a browser
@@ -231,18 +206,13 @@ Back. Handy additions to the address, none of which save anything:
 | `js/quran.js` | The 114 surahs: names and ayah counts |
 | `js/cities.js` | The bundled cities (generated from GeoNames) |
 | `js/backgrounds.js` | The photos, their colours and where the scenery clock sits |
-| `scripts/build.sh` | Packs the unsigned `.wgt`; `--release` packs only what git tracks |
+| `scripts/build.sh` | Packs the unsigned Samsung `.wgt`; `--release` packs only what git tracks |
+| `scripts/build-android.sh`, `android/` | The Android TV app: one small activity around the same web page |
+| `scripts/build-webos.py`, `webos/` | The LG package |
+| `scripts/release.sh` | Builds all three for a GitHub release |
+| `AGENTS.md`, `docs/` | The install guides, for AI agents and for people |
 | `scripts/make-scene.py` | Adds your own photo |
 | `scripts/build-cities.py` | Rebuilds `js/cities.js` from GeoNames and Wikidata (its header says how) |
-
-## Take it off
-
-```sh
-apps2samsung-cli uninstall NoorHome01 --tv <tv address>
-```
-
-or on the TV: Apps, Settings (the cog), pick Noor, Delete. To switch Developer Mode off: Apps,
-**1 2 3 4 5**, Off, restart the TV. Nothing else on the TV was changed.
 
 ## Credits and licence
 

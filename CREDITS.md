@@ -7,7 +7,9 @@ Noor is put together from other people's generous work. Thank you.
 - **couch-tv** by Seagey, https://github.com/Seagey/couch-tv, MIT licence, Copyright (c) 2026 Seagey.
   From it: the clock-behind-the-scenery look (the glass clock, the cut-out drawn over it, the
   frosted and liquid glass fills, the waterline reflection), the shape of the settings screen
-  (sections on one side, rows on the other), and `scripts/make-scene.py`. Its licence text is in
+  (sections on one side, rows on the other), `scripts/make-scene.py`, and the LG package writer
+  in `scripts/build-webos.py`. Its Samsung and LG guides are also where much of the
+  troubleshooting in `docs/` comes from. Its licence text is in
   [LICENSES/couch-tv-MIT.txt](LICENSES/couch-tv-MIT.txt).
 - The no-AI cut-out route in `scripts/make-scene.py` (`--depth`) is **roliusz**'s work
   (github.com/roliusz), from their fork of couch-tv.
