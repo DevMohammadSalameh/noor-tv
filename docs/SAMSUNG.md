@@ -91,7 +91,15 @@ computer, so later installs need no sign-in. The TV may ask to allow the connect
 `Noor.wgt` is unsigned on purpose. A Samsung TV runs only apps signed for that TV, so a package
 signed by anyone else would be refused; this step signs it for theirs.
 
-**Done when** the command ends with `Installed Noor` and the **Person** sees **Noor** in Apps.
+Installing puts the app on the TV without opening it, and replaces a running Noor without
+bringing the new one up. Open it:
+
+```sh
+build/apps2samsung/apps2samsung-cli launch NoorHome01.Noor --tv <tv address>
+```
+
+**Done when** `install` ends with `Installed Noor`, `launch` ends with `Launched`, and the
+**Person** says Noor is on the screen.
 
 ## Opening it by itself
 
