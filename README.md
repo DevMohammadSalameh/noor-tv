@@ -77,8 +77,9 @@ To build them yourself: `sh scripts/build.sh` (Samsung), `sh scripts/build-andro
 
 - **Android TV, Google TV, Fire TV:** Noor can be the TV's screensaver, so it comes up by itself
   whenever the TV has been idle.
-- **Samsung:** the TV starts on Noor when switched on (Samsung's Autorun Last App), stays on it
-  instead of Samsung's screensaver, and can bring Noor to the front at each prayer time.
+- **Samsung:** the TV starts on Noor when switched on (Samsung's Autorun Last App), and Noor can
+  bring itself to the front at each prayer time even when another app is open (seen working on a
+  2025 Samsung). It also asks the TV to stay on it instead of Samsung's screensaver.
 - **LG:** stays on Noor instead of LG's screensaver (untested).
 
 A TV maker decides what an app may do here; each guide says exactly what works on that TV and

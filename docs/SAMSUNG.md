@@ -118,8 +118,10 @@ What Noor can do on a Samsung:
   after you press OK: press it, open another app, and wait. These rows only show on TVs that have
   the alarm feature.
 
-The last two are new and unconfirmed: check them with the person (step 5 of AGENTS.md) and say in
-an issue what the TV did.
+Coming to the front has been seen working on the 2025 Samsung (Tizen 9.0): with another app on
+screen, Noor came up by itself a minute after the test row was pressed. Staying on screen
+instead of Samsung's screensaver is not confirmed yet. Check both with the person (step 5 of
+AGENTS.md), and say in an issue what a different model did.
 
 ## If something goes wrong
 
