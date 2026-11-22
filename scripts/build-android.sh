@@ -50,7 +50,7 @@ TARGET=$(basename "$(dirname "$JAR")" | sed 's/android-//')
 W="$ROOT/build/android"
 rm -rf "$W/assets" "$W/gen" "$W/classes" "$W/dex" "$W/res.zip" "$W"/*.apk
 mkdir -p "$W/assets" "$W/gen" "$W/classes" "$W/dex" "$ROOT/dist"
-FILES="index.html css js fonts img icon.png LICENSE NOTICE CREDITS.md"
+FILES="index.html css js fonts img icon.png LICENSE NOTICE LICENSES CREDITS.md"
 if [ "$1" = "--release" ]; then git archive HEAD $FILES | tar -x -C "$W/assets"
 else tar -c --exclude '.DS_Store' $FILES | tar -x -C "$W/assets"; fi
 rm -f "$W/assets/js/mine.example.js"

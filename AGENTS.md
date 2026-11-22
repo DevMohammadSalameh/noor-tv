@@ -18,12 +18,21 @@ Settings and read you the About page.
 | The TV | Guide | Tried on |
 |---|---|---|
 | **Samsung** smart TV, 2017 or newer (Tizen) | [docs/SAMSUNG.md](docs/SAMSUNG.md) | A real 2025 Samsung (Tizen 9.0) |
-| **Android TV or Google TV** (Sony, TCL, Hisense, Philips, Xiaomi, Chromecast with Google TV, Nvidia Shield, Onn) and **Amazon Fire TV** | [docs/ANDROID-TV.md](docs/ANDROID-TV.md) | An Android 15 emulator driven with remote keys. No real TV yet |
+| **Android TV or Google TV** (Sony, TCL, Hisense, Philips, Xiaomi, Chromecast with Google TV, Nvidia Shield, Onn) and **Amazon Fire TV** running Fire OS | [docs/ANDROID-TV.md](docs/ANDROID-TV.md) | An Android 15 emulator driven with remote keys. No real TV yet |
 | **LG** smart TV (webOS) | [docs/LG.md](docs/LG.md) | Nothing. The package is built and its format checked; Noor has never run on an LG |
 | Anything else (Roku, Apple TV, Vizio, Hisense VIDAA, Panasonic, older sets) | none | Not supported |
 
-For a TV in the last row, say so kindly and stop: a Google TV or Fire TV stick in a spare HDMI
-port (about US$30 to $50) makes any TV an Android one, and Noor goes on that.
+The brand alone can mislead: TCL and Hisense sell Google TV, Roku and Fire TV sets. A Google TV
+or Android TV has a Google account on it and Google Play among its apps; its About page has an
+"Android TV OS" line. A Fire TV's About page says "Fire OS"; the newest low-cost Fire sticks say
+"Vega OS" instead, are not Android, and belong in the last row.
+
+For a TV in the last row, say so kindly and stop: a Google TV stick in a spare HDMI port (about
+US$30 to $50) makes any TV an Android one, and Noor goes on that.
+
+**No computer near the TV?** Only the Android row has a way: "Way B" in its guide, done by the
+person on the TV itself. Samsung and LG need a computer on the TV's network once; say so and
+stop, or offer the stick.
 
 **Done when** the person has confirmed the row their TV is in.
 
@@ -40,7 +49,9 @@ package are fine.
 
 ## 3. Get the package
 
-Download the newest release. These links never change:
+Download the newest release into this folder. These links never change. Check the one you need
+answers before promising anything (`curl -sIL <link>` ends in `200`); if it does not, tell the
+person the release is missing and stop, or build it (below).
 
 | TV | File |
 |---|---|
@@ -50,9 +61,12 @@ Download the newest release. These links never change:
 
 Build it yourself only if the download fails or the person wants their own photos in it
 (README, "Your own photos"): `sh scripts/build.sh`, `sh scripts/build-android.sh`,
-`python3 scripts/build-webos.py`. Each script's header says what it needs.
+`python3 scripts/build-webos.py`. Each script's header says what it needs, and each writes
+`dist/Noor-<version>.<wgt, apk or ipk>`: use that path where a guide says `Noor.wgt`. The two
+`sh` scripts need macOS or Linux (on Windows, WSL); the LG one runs anywhere Python does.
 
-**Done when** the file is on the computer and is larger than 5 MB.
+**Done when** the file is on the computer and is larger than 5 MB. With Android's Way B the TV
+fetches the file itself: skip this step once the link has answered `200`.
 
 ## 4. Install it
 
@@ -62,7 +76,8 @@ Follow the guide for their TV from top to bottom. Each guide marks who does each
 When a step fails, stop, tell the person what happened in one sentence, and look in the guide's
 "If something goes wrong" section. Report what you tried.
 
-**Done when** the install command reports success and the person sees **Noor** among the TV's apps.
+**Done when** the install command reports success (with Android's Way B: the person chose
+Install and it finished) and the person sees **Noor** among the TV's apps.
 
 ## 5. Check it together
 

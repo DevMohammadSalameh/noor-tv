@@ -19,18 +19,23 @@ the computer).
 
 - A computer (Mac, Windows or Linux) on the same Wi-Fi or network as the TV.
 - A Samsung account. The one already on the TV is fine; a new free one works too.
-- `Noor.wgt` ([the newest release](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.wgt)).
+- `Noor.wgt` ([the newest release](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.wgt)),
+  saved in this folder. The commands below are run from this folder.
 
 ## 1. Person: switch on Developer Mode
 
 **You** first find the computer's address on the network, because the TV asks for it:
-macOS `ipconfig getifaddr en0` (or `en1`), Linux `hostname -I`, Windows `ipconfig` (the IPv4 line).
+macOS `ipconfig getifaddr en0` (or `en1`), Linux `hostname -I`, Windows `ipconfig`. A computer
+often has several addresses (Wi-Fi, cable, VPN, virtual machines): use the one on the same network
+as the TV, usually the Wi-Fi adapter's IPv4 address, and switch any VPN off for the install.
 
 Then the **Person**:
 
 1. On the TV open **Apps**.
 2. Press **1 2 3 4 5** on the remote. With the small remote that has no number buttons, press the
-   **123** button and use the number pad that appears on screen.
+   **123** button and use the number pad that appears on screen. **On TVs from 2022 on** this often
+   does nothing: instead scroll to the bottom of the Apps screen, open **App Settings**, and press
+   1 2 3 4 5 there.
 3. A Developer Mode box opens. Switch it **On**, and type the computer's address in the Host PC
    IP boxes. Type each group as it is, with no zeros in front (a group of `7` is `7`, not `007`).
    Press OK.
@@ -48,8 +53,14 @@ Samsung certificate and installs it. Its command line needs no administrator pas
    `Apps2Samsung.Cli-v<version>-<system>` for this computer: `osx-arm64` (Apple silicon Mac),
    `osx-x64` (Intel Mac), `linux-x64`, `linux-arm64`, `win-x64` or `win-arm64`.
 2. Unpack it into `build/apps2samsung/` in this folder (git ignores `build/`).
-3. Run `build/apps2samsung/apps2samsung-cli --help` (`apps2samsung-cli.exe` on Windows). On a Mac
-   that refuses to open it, run `xattr -dr com.apple.quarantine build/apps2samsung` once.
+3. Run `build/apps2samsung/apps2samsung-cli --help`. On Windows it is
+   `build\apps2samsung\apps2samsung-cli.exe`, with backslashes, in every command below. On a Mac
+   that refuses to open it, run `xattr -dr com.apple.quarantine build/apps2samsung` once; on
+   Windows, `Unblock-File build\apps2samsung\apps2samsung-cli.exe` in PowerShell.
+
+On a Mac, the first command that reaches the TV may ask to "find devices on your local network":
+the person chooses Allow. If the tool then cannot find the TV, switch the terminal app on under
+System Settings, Privacy & Security, Local Network.
 
 A person without an agent can use the same project's desktop app instead (a `.dmg`, `.msi` or
 `.AppImage` on that page): pick the TV, choose **Custom .wgt**, pick `Noor.wgt`, press Install.
@@ -106,7 +117,8 @@ which has been through many more TVs.
 ## Take it off
 
 ```sh
-build/apps2samsung/apps2samsung-cli uninstall NoorHome01 --tv <tv address>
+build/apps2samsung/apps2samsung-cli installed --tv <tv address>     # prints Noor's id, e.g. NoorHome01.Noor
+build/apps2samsung/apps2samsung-cli uninstall <that id> --tv <tv address>
 ```
 
 or on the TV: Apps, Settings (the cog), pick Noor, Delete. To switch Developer Mode off again:

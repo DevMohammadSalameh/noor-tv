@@ -2,13 +2,17 @@
 
 One app, `Noor.apk`, for TVs and boxes that run Android: Sony, TCL, Hisense (Android or Google TV
 models), Philips, Xiaomi, Chromecast with Google TV, Google TV Streamer, Nvidia Shield, Onn, and
-Amazon Fire TV sticks and TVs. Android 5 or newer.
+Amazon Fire TV sticks and TVs that run **Fire OS**. Android 5 or newer.
+
+Not for Amazon's newest low-cost sticks that run **Vega OS** (Settings, My Fire TV, About says
+which): they are not Android and cannot take this app.
 
 **How far it has been tried.** The app was built and run in an Android 15 emulator, driven with
 the same key presses a remote sends: the first-run setup, the home, a surah playing, the TV
 keyboard for the city search, and Back leaving the app all worked. It has **not been run on a
-real TV yet**. Tell the person so, and afterwards please open an issue with the model and how it
-went.
+real TV yet**, and Way B below (Downloader) has not been walked through on one either: its menu
+names are the usual ones, not ones we have watched. Tell the person so, and afterwards please
+open an issue with the model and how it went.
 
 Steps are marked **Person** (at the TV, with the remote) or **You** (the agent, or whoever is at
 the computer).
@@ -93,21 +97,30 @@ Wireless debugging) off.
 
 1. **Person:** open the TV's app store (Google Play on the TV, or the Appstore on a Fire TV),
    search for **Downloader** (by AFTVnews, orange icon) and install it.
-2. **Person:** let Downloader install apps.
+2. **Person:** let Downloader install apps. If you skip this, Android asks at step 4 instead and
+   offers a **Settings** button that leads to the same switch.
    - Google TV: **Settings, Apps, Security & restrictions, Unknown sources**, switch **Downloader** on.
+     On some versions it is **Settings, Privacy, Security & restrictions**.
    - Older Android TV: **Settings, Device Preferences, Security & restrictions, Unknown sources**.
    - Fire TV: **Settings, My Fire TV, Developer Options, Install unknown apps**, switch
      **Downloader** on. (If Developer Options is missing: Settings, My Fire TV, About, press OK on
      the device's name seven times.)
-3. **Person:** open Downloader, choose the address box, and type exactly:
+3. **Person:** open Downloader. The first time it asks to access files: choose Allow. Choose the
+   address box, and type exactly:
 
    ```
    github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.apk
    ```
 
    Capital letters matter. Press **Go**. If it does not start, type `https://` in front.
-4. **Person:** when the download ends choose **Install**, then **Open**. Afterwards Downloader
+   Typing this with a remote is slow. The phone app for the TV has a keyboard: **Google TV** (or
+   Google Home) for a Google TV, the **Amazon Fire TV** app for a Fire TV. With the address box
+   open on the TV, typing on the phone fills it in.
+4. **Person:** when the download ends choose **Install**, then **Open**. If a Google Play Protect
+   box says the app is from an unknown developer, choose **Install anyway**. Afterwards Downloader
    offers to delete the downloaded file: choose Delete.
+5. **Person:** switch the Unknown sources switch from step 2 off again. Downloader itself can stay
+   or be uninstalled; Noor does not need it.
 
 ## Finding and opening Noor afterwards
 
@@ -136,7 +149,9 @@ reciter, what happens after a surah) on screen.
 | `adb connect` says "Connection refused" | Debugging is off, or the TV has only Wireless debugging (see the pairing note in A3). Some TVs need a restart after switching debugging on. |
 | `adb devices` says "unauthorized" | The "Allow USB debugging?" box was missed. Have the person look at the TV; `adb disconnect`, then connect again to show it once more. |
 | `install` says `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | A Noor built on someone's own computer is on the TV, signed with a different key. Remove it (below), then install. |
-| Downloader says the app cannot be installed | Step B2 was skipped, or it was switched on for a different app. |
+| Downloader shows an error instead of downloading | A letter is wrong or the wrong case: compare with the address above, character by character. Then try with `https://` in front. |
+| Downloader says the app cannot be installed | Step 2 of Way B was skipped, or it was switched on for a different app. |
+| "App not installed" straight after Install | An older Android than 5, or a Noor from another source is already there: uninstall it first. |
 | The picture is the wrong size or cut off | Please open an issue with the TV model and the line `adb logcat -d \| grep "Noor "` prints: it holds the window size Noor measured. |
 | No sound | Check another app has sound; then report it. Sound was not testable in the emulator. |
 

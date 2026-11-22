@@ -25,9 +25,20 @@ the computer).
 - A free **LG developer account**: the **Person** registers at https://webostv.developer.lge.com
   and signs in with it on the TV.
 - `Noor.ipk` ([the newest release](https://github.com/DevMohammadSalameh/noor-tv/releases/latest/download/Noor.ipk)).
-- Either LG's command line tools (needs Node.js): `npm install -g @webos-tools/cli`, or the desktop
-  app **webOS Dev Manager** (https://github.com/webosbrew/dev-manager-desktop), which does steps 2
-  and 3 with buttons.
+- LG's command line tools, which need Node.js (`node --version` says whether it is there; if not,
+  install it from https://nodejs.org, which asks the person for their computer password). Keep the
+  tools inside this folder:
+
+  ```sh
+  npm install --prefix build/ares @webos-tools/cli
+  export PATH="$PWD/build/ares/node_modules/.bin:$PATH"
+  ```
+
+  Or the desktop app **webOS Dev Manager** (https://github.com/webosbrew/dev-manager-desktop),
+  which does steps 2 and 3 with buttons and needs no Node.
+- Which LG TVs: unknown. LG's Developer Mode exists on webOS TVs from about 2014; Noor is written
+  for the browser engines of 2017 and later. Note the model and webOS version (Settings, General,
+  About This TV) for the issue.
 
 ## 1. Person: Developer Mode on the TV
 
@@ -56,6 +67,10 @@ which the next step fails with "All configured authentication methods failed".
 **Done when** `ares-launch --device noor com.palmdts.devmode` makes the Developer Mode app come up
 on the TV.
 
+On a Mac, the first of these to reach the TV may ask to "find devices on your local network": the
+person chooses Allow. If the tools time out, switch the terminal app on under System Settings,
+Privacy & Security, Local Network.
+
 On Windows the key file is `%USERPROFILE%\.ssh\noor_webos`. If `ares-install` then says
 "Encrypted OpenSSH private key detected", the third line was skipped.
 
@@ -79,10 +94,14 @@ hours on a recent TV; older ones give 50). Before it reaches zero, open Develope
 **Extend**. If it runs out, LG removes Noor; steps 1 and 3 put it back, and the settings inside
 Noor may have to be chosen again.
 
-## Opening it automatically
+## Opening it automatically, and the screensaver
 
 There is no setting for this that has been tried with Noor. The person opens Noor from the row of
 apps; moving it to the front of the row (hold OK on it, then move) keeps it one press away.
+
+Noor does nothing about LG's screensaver, so after some minutes without a button press the TV
+will probably show its own instead of Noor. On an OLED, whose makers warn about still pictures,
+that is the safer behaviour; Noor's own Settings, Screen has dimming and a gentle shift as well.
 
 ## The remote
 
@@ -111,6 +130,9 @@ ares-install --device noor --remove io.github.devmohammadsalameh.noor
 or on the TV: hold OK on Noor in the row of apps and choose delete. To leave Developer Mode:
 open the Developer Mode app and switch Dev Mode Status off (the TV restarts and LG removes
 anything installed through it). Nothing else on the TV was changed.
+
+On the computer: `ares-setup-device -r noor` forgets the TV, the key is the file `noor_webos` in
+the `.ssh` folder of the home directory, and `build/ares` holds the tools. All three can be deleted.
 
 ## Building it yourself
 

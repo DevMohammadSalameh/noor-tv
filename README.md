@@ -49,7 +49,7 @@ your own accounts. You need no technical knowledge.
 |---|---|---|---|
 | **Samsung** (2017 or newer) | A computer on the same Wi-Fi, once. The TV's Developer Mode. Your Samsung account. | [docs/SAMSUNG.md](docs/SAMSUNG.md) | A real 2025 Samsung |
 | **Android TV, Google TV, Fire TV** | Nothing but the TV: a free app called Downloader and one web address. Or a computer, if an agent is helping. | [docs/ANDROID-TV.md](docs/ANDROID-TV.md) | An emulator only, not a real TV yet |
-| **LG** | A computer once, LG's Developer Mode app, a free LG developer account. LG removes it unless you press Extend every few weeks. | [docs/LG.md](docs/LG.md) | Not tried on any LG yet |
+| **LG** | A computer once, LG's Developer Mode app, a free LG developer account. LG removes it when Developer Mode's timer runs out, unless you press Extend on the TV in time. | [docs/LG.md](docs/LG.md) | Not tried on any LG yet |
 | Roku, Apple TV, Vizio and others | Not supported. A Google TV or Fire TV stick in a spare HDMI port makes any TV an Android one. | | |
 
 Noor is not in any TV's app store, so each of these is the maker's own way of adding an app

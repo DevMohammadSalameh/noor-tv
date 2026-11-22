@@ -5,7 +5,7 @@
 #   sh scripts/build.sh --release  only what git tracks, for a GitHub release (nothing of yours in it)
 #
 # The package is not signed. Apps2Samsung signs it with your own Samsung certificate when it
-# installs it (README, "Install it on your TV").
+# installs it (docs/SAMSUNG.md).
 set -e
 cd "$(dirname "$0")/.."
 VERSION=$(sed -n 's/.*<widget[^>]* version="\([^"]*\)".*/\1/p' config.xml)

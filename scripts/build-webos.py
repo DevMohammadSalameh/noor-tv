@@ -27,7 +27,7 @@ import tarfile
 import time
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-FILES = ["index.html", "css", "js", "fonts", "img", "LICENSE", "NOTICE", "CREDITS.md"]
+FILES = ["index.html", "css", "js", "fonts", "img", "LICENSE", "NOTICE", "LICENSES", "CREDITS.md"]
 
 
 def _tar_gz(entries):

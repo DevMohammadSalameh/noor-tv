@@ -3,7 +3,7 @@ tools/
 build/
 
 # Built packages. They are never committed: each person signs the app with their own
-# Samsung certificate when they install it (README, "Install it on your TV").
+# Samsung certificate when they install it (docs/SAMSUNG.md).
 dist/
 *.wgt
 *.apk
